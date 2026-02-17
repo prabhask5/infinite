@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- ================================================================= -->
+    <!--                     CORE DOCUMENT META                            -->
+    <!-- ================================================================= -->
+    <meta charset="utf-8" />
+    <title>Infinite Notes</title>
+    <link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/icons/favicon.svg" />
+    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" />
+
+    <!--
+      Viewport configuration:
+        - `initial-scale=1`          → no zoom on load
+        - `viewport-fit=cover`       → extend into safe-area insets (notch, home bar)
+        - `width=device-width`       → responsive width
+        - `interactive-widget=overlays-content` → keyboard overlays rather than
+          resizing the viewport (prevents layout shift on mobile)
+    -->
+    <meta
+      name="viewport"
+      content="initial-scale=1, viewport-fit=cover, width=device-width, interactive-widget=overlays-content"
+    />
+
+    <!-- ================================================================= -->
+    <!--                         SEO META TAGS                             -->
+    <!-- ================================================================= -->
+
+    <!-- Theme color matches `--color-void` for seamless safe-area blending -->
+    <meta name="theme-color" content="#050510" />
+    <meta name="description" content="Infinite Notes - A self-hosted offline first PWA notes app" />
+    <meta
+      name="keywords"
+      content="pwa, offline-first, productivity, utilities, svelte, sveltekit"
+    />
+    <meta name="author" content="Infinite" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- ================================================================= -->
+    <!--                    OPEN GRAPH / SOCIAL MEDIA                      -->
+    <!-- ================================================================= -->
+
+    <!-- Used by Facebook, LinkedIn, Discord, Slack, etc. for link previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Infinite Notes" />
+    <meta property="og:description" content="A self-hosted offline first PWA notes app" />
+    <meta property="og:image" content="%sveltekit.assets%/icon-512.png" />
+
+    <!-- ================================================================= -->
+    <!--                         TWITTER CARD                              -->
+    <!-- ================================================================= -->
+
+    <!-- "summary" card type → square image + title + description -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Infinite Notes" />
+    <meta name="twitter:description" content="A self-hosted offline first PWA notes app" />
+
+    <!-- ================================================================= -->
+    <!--                      PWA / MANIFEST CONFIG                        -->
+    <!-- ================================================================= -->
+
+    <!-- Web App Manifest — defines name, icons, theme, display mode -->
+    <link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+
+    <!-- ================================================================= -->
+    <!--                       iOS PWA META TAGS                           -->
+    <!-- ================================================================= -->
+
+    <!--
+      iOS-specific PWA configuration:
+        - `apple-mobile-web-app-capable`            → enables standalone PWA mode
+        - `apple-mobile-web-app-status-bar-style`   → `black-translucent` lets
+          content extend behind the status bar for a true full-screen feel
+        - `apple-mobile-web-app-title`              → name shown on home screen
+        - `apple-touch-icon`                        → icon used when "Add to Home Screen"
+    -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Infinite" />
+    <link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
+
+    <!-- Prevent iOS from auto-detecting and styling phone numbers as links -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- SvelteKit injects component-level <head> content here -->
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <!-- ================================================================= -->
+    <!--               LANDSCAPE ORIENTATION BLOCKER                       -->
+    <!-- ================================================================= -->
+    <!-- ── Landscape blocker: shown by the media query below on phones in landscape ── -->
+    <div id="landscape-blocker">
+      <!-- Rotate-phone SVG icon: phone outline with a rotation arrow -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="52"
+        height="52"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        id="landscape-icon"
+        aria-hidden="true"
+      >
+        <!-- Phone body (portrait orientation) -->
+        <rect x="7" y="2" width="10" height="18" rx="2" ry="2" />
+        <line x1="12" y1="18" x2="12" y2="18.01" />
+        <!-- Curved rotation arrow around the phone -->
+        <path d="M4.5 9.5A8.5 8.5 0 0 1 14 3" />
+        <polyline points="14 3 14 6.5 10.5 6.5" />
+      </svg>
+      <!-- Instruction text -->
+      <p id="landscape-label">Please rotate your device</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!--              LANDSCAPE BLOCKER STYLES                             -->
+    <!-- ================================================================= -->
+    <style>
+      /* ── Base: hidden by default ────────────────────────────────────── */
+      #landscape-blocker {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background: #f8f9fb;
+        color: #1a1a2e;
+      }
+
+      #landscape-icon {
+        color: #4a7dff;
+        animation: blockerRotateHint 2.5s ease-in-out infinite;
+      }
+
+      @keyframes blockerRotateHint {
+        0%,
+        60%,
+        100% {
+          transform: rotate(0deg);
+        }
+        30% {
+          transform: rotate(-20deg);
+        }
+      }
+
+      #landscape-label {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #4a5568;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      }
+
+      /* ── Visibility Trigger ─────────────────────────────────────────── */
+      /*
+       * Show the blocker ONLY on phones in landscape:
+       *   - max-height: 500px   → landscape phone viewports
+       *   - orientation          → landscape
+       *   - hover: none          → excludes desktop/laptop (they have hover)
+       *   - pointer: coarse      → excludes stylus / mouse devices
+       */
+      @media (max-height: 500px) and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+        #landscape-blocker {
+          display: flex;
+        }
+      }
+    </style>
+
+    <!-- ================================================================= -->
+    <!--                      SVELTEKIT APP MOUNT                          -->
+    <!-- ================================================================= -->
+    <!-- `display: contents` makes the wrapper invisible to CSS layout     -->
+    <div style="display: contents">%sveltekit.body%</div>
+
+    <!-- ================================================================= -->
+    <!--              iOS GESTURE / ZOOM PREVENTION SCRIPT                 -->
+    <!-- ================================================================= -->
+    <!--
+      Prevents unwanted zoom gestures in the iOS PWA:
+        1. `gesturestart/change/end` → blocks pinch-to-zoom (Safari-specific)
+        2. `touchend` debounce       → blocks double-tap zoom (300 ms window)
+        3. `touchmove` multi-touch   → blocks two-finger zoom/scroll
+
+      All listeners use `{ passive: false }` so `preventDefault()` works.
+      Wrapped in an IIFE to avoid polluting the global scope.
+    -->
+    <script>
+      (function () {
+        // Prevent pinch-to-zoom
+        document.addEventListener(
+          'gesturestart',
+          function (e) {
+            e.preventDefault();
+          },
+          { passive: false }
+        );
+
+        document.addEventListener(
+          'gesturechange',
+          function (e) {
+            e.preventDefault();
+          },
+          { passive: false }
+        );
+
+        document.addEventListener(
+          'gestureend',
+          function (e) {
+            e.preventDefault();
+          },
+          { passive: false }
+        );
+
+        // Prevent double-tap zoom — if two taps land within 300 ms, cancel the second
+        var lastTouchEnd = 0;
+        document.addEventListener(
+          'touchend',
+          function (e) {
+            var now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+              e.preventDefault();
+            }
+            lastTouchEnd = now;
+          },
+          { passive: false }
+        );
+
+        // Prevent multi-touch zoom — block touchmove when more than one finger is down
+        document.addEventListener(
+          'touchmove',
+          function (e) {
+            if (e.touches.length > 1) {
+              e.preventDefault();
+            }
+          },
+          { passive: false }
+        );
+      })();
+    </script>
+
+    <!-- ================================================================= -->
+    <!--                SERVICE WORKER REGISTRATION                        -->
+    <!-- ================================================================= -->
+    <!--
+      Deferred registration strategy:
+        - Uses `requestIdleCallback` (with `setTimeout` fallback) so the SW
+          doesn't compete with first-paint work on the main thread.
+        - After registration, sets up three update-check triggers:
+            1. `visibilitychange` → check when tab becomes visible again
+            2. `setInterval`      → every 5 minutes (iOS fallback — it doesn't
+               reliably fire visibilitychange in standalone PWA mode)
+            3. `online`           → check when connectivity is restored
+    -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        // Use requestIdleCallback to defer SW registration until browser is idle
+        var registerSW = function () {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then(function (registration) {
+              // Primary: check for updates when tab becomes visible
+              document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                  registration.update();
+                }
+              });
+              // Fallback: periodic update check (iOS PWA doesn't fire visibilitychange reliably)
+              setInterval(
+                function () {
+                  registration.update();
+                },
+                5 * 60 * 1000
+              );
+              // Also check when device comes back online
+              window.addEventListener('online', function () {
+                registration.update();
+              });
+            })
+            .catch(function () {});
+        };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(registerSW);
+        } else {
+          setTimeout(registerSW, 1);
+        }
+      }
+    </script>
+  </body>
+</html>
