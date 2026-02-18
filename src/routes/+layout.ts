@@ -51,6 +51,8 @@ export type { RootLayoutData as LayoutData };
 if (browser) {
   initEngine({
     prefix: 'infinite',
+    name: 'Infinite Notes',
+    domain: window.location.origin,
     schema,
     auth: { gateType: 'code' },
     demo: demoConfig,

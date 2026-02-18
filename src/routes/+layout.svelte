@@ -331,7 +331,48 @@
      ═══════════════════════════════════════════════════════════════════════════ -->
 {#if !hasHydrated() && !isAuthPage}
   <div class="loading-overlay">
-    <div class="loading-spinner"></div>
+    <!-- Subtle paper grain texture -->
+    <div class="loader-grain" aria-hidden="true"></div>
+
+    <div class="loader-scene">
+      <!-- Ink drop that blooms into a ring -->
+      <div class="ink-bloom" aria-hidden="true">
+        <div class="ink-ring ink-ring-1"></div>
+        <div class="ink-ring ink-ring-2"></div>
+        <div class="ink-dot"></div>
+      </div>
+
+      <!-- Pen nib writing a line -->
+      <div class="pen-line" aria-hidden="true">
+        <svg
+          class="pen-nib"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+        </svg>
+        <div class="ink-trail"></div>
+      </div>
+
+      <!-- Brand text fades in below -->
+      <p class="loader-brand" aria-label="Loading Infinite Notes" role="status">
+        <span class="brand-letter" style="--i:0">I</span><span class="brand-letter" style="--i:1"
+          >n</span
+        ><span class="brand-letter" style="--i:2">f</span><span class="brand-letter" style="--i:3"
+          >i</span
+        ><span class="brand-letter" style="--i:4">n</span><span class="brand-letter" style="--i:5"
+          >i</span
+        ><span class="brand-letter" style="--i:6">t</span><span class="brand-letter" style="--i:7"
+          >e</span
+        >
+      </p>
+    </div>
   </div>
 {/if}
 
@@ -603,7 +644,7 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     LOADING OVERLAY
+     LOADING OVERLAY — Ink Bloom Loader
      ═══════════════════════════════════════════════════════════════════════════ */
 
   .loading-overlay {
@@ -614,20 +655,250 @@
     align-items: center;
     justify-content: center;
     background: var(--color-bg);
+    overflow: hidden;
   }
 
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+  /* Subtle paper grain texture overlay */
+  .loader-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
   }
 
-  @keyframes spin {
+  /* Central scene container */
+  .loader-scene {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    animation: sceneEntry 0.5s var(--ease-out) both;
+  }
+
+  @keyframes sceneEntry {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
     to {
-      transform: rotate(360deg);
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ── Ink Bloom — concentric rings expanding from a central dot ── */
+
+  .ink-bloom {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ink-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-primary);
+  }
+
+  .ink-ring-1 {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    animation: inkExpand 2.4s var(--ease-out) infinite;
+  }
+
+  .ink-ring-2 {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    animation: inkExpand 2.4s var(--ease-out) 0.8s infinite;
+  }
+
+  @keyframes inkExpand {
+    0% {
+      transform: scale(0.3);
+      opacity: 0.7;
+    }
+    60% {
+      opacity: 0.15;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* Central ink dot — pulses gently */
+  .ink-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow:
+      0 0 16px var(--color-primary-glow),
+      0 0 32px rgba(74, 125, 255, 0.15);
+    animation: dotPulse 2.4s var(--ease-in-out) infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes dotPulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+  }
+
+  /* ── Pen Nib + Ink Trail — a pen writing a line ── */
+
+  .pen-line {
+    position: relative;
+    width: 120px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  .pen-nib {
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 6px var(--color-primary-glow));
+    animation: penMove 2.4s var(--ease-in-out) infinite;
+    z-index: 2;
+  }
+
+  @keyframes penMove {
+    0% {
+      left: 0;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    70% {
+      left: calc(100% - 18px);
+      opacity: 1;
+    }
+    85% {
+      opacity: 0;
+    }
+    100% {
+      left: calc(100% - 18px);
+      opacity: 0;
+    }
+  }
+
+  /* The ink trail drawn behind the pen */
+  .ink-trail {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    border-radius: var(--radius-full);
+    transform-origin: left center;
+    animation: trailDraw 2.4s var(--ease-in-out) infinite;
+  }
+
+  @keyframes trailDraw {
+    0% {
+      width: 0;
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+    }
+    70% {
+      width: calc(100% - 18px);
+      opacity: 0.6;
+    }
+    85% {
+      width: calc(100% - 18px);
+      opacity: 0;
+    }
+    100% {
+      width: 0;
+      opacity: 0;
+    }
+  }
+
+  /* ── Brand Letters — stagger-typed "Infinite" ── */
+
+  .loader-brand {
+    display: flex;
+    gap: 0;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0;
+    user-select: none;
+  }
+
+  .brand-letter {
+    opacity: 0;
+    transform: translateY(6px);
+    animation: letterType 0.35s var(--ease-out) forwards;
+    animation-delay: calc(0.6s + var(--i) * 0.07s);
+  }
+
+  @keyframes letterType {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Reduced Motion ── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .ink-ring-1,
+    .ink-ring-2,
+    .ink-dot,
+    .pen-nib,
+    .ink-trail {
+      animation: none;
+    }
+
+    .ink-ring-1 {
+      opacity: 0.2;
+      transform: scale(0.7);
+    }
+
+    .ink-ring-2 {
+      opacity: 0.1;
+      transform: scale(1);
+    }
+
+    .ink-dot {
+      opacity: 1;
+    }
+
+    .pen-line {
+      display: none;
+    }
+
+    .brand-letter {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .loader-scene {
+      animation: none;
     }
   }
 

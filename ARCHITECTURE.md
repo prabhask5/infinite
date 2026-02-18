@@ -243,7 +243,11 @@ When no runtime config exists, the app redirects to `/setup` instead of `/login`
 2. Configure auth (enable anonymous sign-ins).
 3. Initialize the database schema (SQL provided).
 4. Enter and validate credentials (Supabase URL + publishable key) — calls `POST /api/setup/validate`.
-5. Persist configuration — calls `POST /api/setup/deploy` with a Vercel API token, which sets the env vars on the Vercel project and triggers a redeployment. The wizard then polls `navigator.serviceWorker.registration.update()` every 3 seconds until a new service worker version is detected in the waiting state, confirming the deploy succeeded.
+5. Persist configuration — calls `POST /api/setup/deploy` with a Vercel API token, which sets the env vars (`PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`) on the Vercel project and triggers a redeployment. The wizard then polls `navigator.serviceWorker.registration.update()` every 3 seconds until a new service worker version is detected in the waiting state, confirming the deploy succeeded.
+
+### Email templates and multi-app Supabase
+
+The engine's `name` and `domain` fields (set in `initEngine()`) are written to Supabase `user_metadata` as `app_name` and `app_domain`. Supabase email templates use `{{ .Data.app_domain }}` for confirmation links and `{{ .Data.app_name }}` for the app name. The `domain` is always `window.location.origin` at runtime, so no environment variable is needed. This allows Infinite Notes and Stellar Planner to share one Supabase project while each app's emails link to the correct domain. See [stellar-drive EMAIL_TEMPLATES.md](https://github.com/prabhask5/stellar-drive/blob/main/EMAIL_TEMPLATES.md) for full template setup instructions.
 
 ---
 
