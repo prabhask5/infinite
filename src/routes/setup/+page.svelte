@@ -1,5 +1,5 @@
 <!--
-  @fileoverview Five-step Supabase configuration wizard.
+  @fileoverview Four-step Supabase configuration wizard.
 
   Guides the user through entering Supabase credentials, validating them
   against the server, optionally deploying environment variables to Vercel,
@@ -9,14 +9,13 @@
   /**
    * @fileoverview Setup wizard page — first-time Supabase configuration.
    *
-   * Guides the user through a five-step process to connect their own
+   * Guides the user through a four-step process to connect their own
    * Supabase backend to Infinite Notes:
    *
    * 1. Create a Supabase project (instructions only).
-   * 2. Configure authentication (enable anonymous sign-ins).
-   * 3. Initialize the database by running the schema SQL.
-   * 4. Enter and validate Supabase credentials (URL + publishable key).
-   * 5. Persist configuration via Vercel API (set env vars + redeploy).
+   * 2. Initialize the database by running the schema SQL.
+   * 3. Enter and validate Supabase credentials (URL + publishable key).
+   * 4. Persist configuration via Vercel API (set env vars + redeploy).
    *
    * After a successful deploy the page polls for a new service-worker
    * version — once detected the user is prompted to refresh.
@@ -230,11 +229,11 @@
   <div class="setup-container">
     <!-- ═══ Header ═══ -->
     <h1 class="setup-title">Set Up Infinite Notes</h1>
-    <p class="setup-subtitle">Connect your own Supabase backend in five quick steps.</p>
+    <p class="setup-subtitle">Connect your own Supabase backend in four quick steps.</p>
 
     <!-- ═══ Step Indicator ═══ -->
     <div class="step-indicator">
-      {#each [1, 2, 3, 4, 5] as step (step)}
+      {#each [1, 2, 3, 4] as step (step)}
         <div
           class="step-dot"
           class:active={currentStep === step}
@@ -255,7 +254,7 @@
             {step}
           {/if}
         </div>
-        {#if step < 5}
+        {#if step < 4}
           <div class="step-line" class:completed={currentStep > step}></div>
         {/if}
       {/each}
@@ -292,19 +291,6 @@
           </li>
           <li>Wait for provisioning to finish (about 30 seconds)</li>
         </ol>
-
-        <!-- ─── Step 2: Configure Authentication ─── -->
-      {:else if currentStep === 2}
-        <h2>Enable Anonymous Sign-ins</h2>
-        <p>
-          Infinite Notes uses anonymous sessions so users can start taking notes immediately without
-          creating an account.
-        </p>
-        <ol class="instruction-list">
-          <li>In your Supabase dashboard, go to <strong>Authentication &gt; Providers</strong></li>
-          <li>Find <strong>Anonymous Sign-ins</strong> and toggle it <strong>on</strong></li>
-          <li>Click <strong>Save</strong></li>
-        </ol>
         <div class="info-note">
           <svg
             width="14"
@@ -328,38 +314,17 @@
           >
         </div>
 
-        <!-- ─── Step 3: Initialize Database ─── -->
-      {:else if currentStep === 3}
+        <!-- ─── Step 2: Initialize Database ─── -->
+      {:else if currentStep === 2}
         <h2>Initialize the Database</h2>
         <p>
-          The required tables and RLS policies are created automatically when the app connects to
-          your Supabase project for the first time. No manual SQL is needed.
+          The required tables and RLS policies are created automatically during the build process.
+          When your app deploys to Vercel, the schema is pushed to your Supabase database &mdash; no
+          manual SQL is needed.
         </p>
-        <div class="info-note">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            ><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line
-              x1="12"
-              y1="8"
-              x2="12.01"
-              y2="8"
-            /></svg
-          >
-          <span
-            >If you need to run the schema manually, you can find <code>supabase-schema.sql</code> in
-            the repository root.</span
-          >
-        </div>
 
-        <!-- ─── Step 4: Enter Credentials ─── -->
-      {:else if currentStep === 4}
+        <!-- ─── Step 3: Enter Credentials ─── -->
+      {:else if currentStep === 3}
         <h2>Connect Your Supabase Project</h2>
         <p>
           Find these values in your Supabase dashboard under <strong>Settings &gt; API</strong>.
@@ -416,7 +381,7 @@
           {/if}
         </button>
 
-        <!-- ─── Step 5: Deploy ─── -->
+        <!-- ─── Step 4: Deploy ─── -->
       {:else}
         <h2>Deploy to Vercel</h2>
 
@@ -589,9 +554,9 @@
         <div></div>
       {/if}
 
-      {#if currentStep < 4}
+      {#if currentStep < 3}
         <button class="btn btn-primary" onclick={() => currentStep++}> Continue </button>
-      {:else if currentStep === 4}
+      {:else if currentStep === 3}
         <button
           class="btn btn-primary"
           onclick={() => currentStep++}
