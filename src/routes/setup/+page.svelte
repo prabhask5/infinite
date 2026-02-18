@@ -787,15 +787,6 @@
     color: var(--color-primary);
   }
 
-  .info-note code {
-    background: var(--color-primary-subtle);
-    padding: 0.0625rem 0.25rem;
-    border-radius: var(--radius-xs);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--color-primary);
-  }
-
   /* ═══════════════════════════════════════════════════════════════════════════════
      FORM STYLES
      ═══════════════════════════════════════════════════════════════════════════════ */
