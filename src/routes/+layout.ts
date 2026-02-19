@@ -13,7 +13,7 @@
 import { browser } from '$app/environment';
 import { redirect } from '@sveltejs/kit';
 import { goto } from '$app/navigation';
-import { initEngine } from 'stellar-drive';
+import { initEngine, supabase } from 'stellar-drive';
 import { lockSingleUser } from 'stellar-drive/auth';
 import { resolveRootLayout } from 'stellar-drive/kit';
 import { schema } from '$lib/schema';
@@ -55,6 +55,7 @@ if (browser) {
     domain: window.location.origin,
     schema,
     crdt: true,
+    supabase,
     auth: { gateType: 'code' },
     demo: demoConfig,
     onAuthStateChange: (_event, _session) => {
