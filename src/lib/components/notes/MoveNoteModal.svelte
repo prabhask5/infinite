@@ -30,7 +30,7 @@
     noteId: string;
     isOpen: boolean;
     onClose: () => void;
-    onMove: (targetId: string | null) => void;
+    onMove: (targetId: string | null) => void | Promise<void>;
   } = $props();
 
   // ===========================================================================
@@ -68,10 +68,19 @@
     }
   }
 
-  function handleSelect(targetId: string | null) {
+  let moveInProgress = false;
+  async function handleSelect(targetId: string | null) {
+    if (moveInProgress) return;
+    moveInProgress = true;
     debug('log', '[MoveNoteModal] Selected target:', targetId ?? 'root');
-    onMove(targetId);
-    onClose();
+    try {
+      await onMove(targetId);
+      onClose();
+    } catch (err) {
+      debug('error', '[MoveNoteModal] Move failed:', err);
+    } finally {
+      moveInProgress = false;
+    }
   }
 
   function handleBackdropClick(e: MouseEvent) {

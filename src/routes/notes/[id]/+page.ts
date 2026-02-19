@@ -8,7 +8,7 @@
 import { browser } from '$app/environment';
 import { error } from '@sveltejs/kit';
 import { queryOne } from 'stellar-drive/data';
-import { openDocument, createBlockDocument } from 'stellar-drive/crdt';
+import { openDocument, closeDocument, createBlockDocument } from 'stellar-drive/crdt';
 import { debug } from 'stellar-drive/utils';
 import { getBreadcrumbs } from '$lib/stores/notes';
 import type { PageLoad } from './$types';
@@ -23,6 +23,9 @@ export interface NotePageData {
   breadcrumbs: Note[];
 }
 
+/** Track the current document ID at module scope to close it on re-navigation. */
+let currentDocumentId: string | null = null;
+
 export const load: PageLoad = async ({ params }): Promise<NotePageData> => {
   if (!browser) {
     // SSR fallback — return empty data, client will hydrate
@@ -30,26 +33,47 @@ export const load: PageLoad = async ({ params }): Promise<NotePageData> => {
   }
 
   const noteId = params.id;
+  const documentId = `note-content-${noteId}`;
   debug('log', '[NoteEditor] Loading note:', noteId);
 
-  // Load note metadata, breadcrumbs, and CRDT document in parallel
-  const documentId = `note-content-${noteId}`;
+  // Close previous document if navigating between notes (SvelteKit reuses this route)
+  if (currentDocumentId && currentDocumentId !== documentId) {
+    debug('log', '[NoteEditor] Closing previous document:', currentDocumentId);
+    void closeDocument(currentDocumentId);
+  }
+  currentDocumentId = documentId;
+
   debug('log', '[NoteEditor] Opening CRDT document:', documentId);
 
-  const [note, breadcrumbs, provider] = await Promise.all([
-    queryOne<Note>('notes', noteId),
-    getBreadcrumbs(noteId),
-    openDocument(documentId, noteId, { offlineEnabled: true })
-  ]);
+  // Load note metadata first (fast), open CRDT document in parallel
+  let provider: CRDTProvider | null = null;
+  try {
+    const [note, breadcrumbs, prov] = await Promise.all([
+      queryOne<Note>('notes', noteId),
+      getBreadcrumbs(noteId),
+      openDocument(documentId, noteId, { offlineEnabled: true })
+    ]);
+    provider = prov;
 
-  if (!note) {
-    debug('error', '[NoteEditor] Note not found:', noteId);
-    error(404, 'Note not found');
+    if (!note) {
+      debug('error', '[NoteEditor] Note not found:', noteId);
+      // Clean up leaked provider on 404
+      void closeDocument(documentId);
+      currentDocumentId = null;
+      error(404, 'Note not found');
+    }
+
+    // Create block document structure (ensures content + meta shared types exist)
+    const { meta } = createBlockDocument(provider.doc);
+    debug('log', '[NoteEditor] CRDT document opened, Y.Doc ready');
+
+    return { note, provider, ydoc: provider.doc, meta, breadcrumbs };
+  } catch (e) {
+    // Clean up on any error (including 404 redirect)
+    if (provider) {
+      void closeDocument(documentId);
+      currentDocumentId = null;
+    }
+    throw e;
   }
-
-  // Create block document structure (ensures content + meta shared types exist)
-  const { meta } = createBlockDocument(provider.doc);
-  debug('log', '[NoteEditor] CRDT document opened, Y.Doc ready');
-
-  return { note, provider, ydoc: provider.doc, meta, breadcrumbs };
 };

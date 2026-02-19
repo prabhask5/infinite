@@ -14,6 +14,7 @@
   @prop {(icon: string | null) => void} onIconChange - Callback when icon changes.
 -->
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { debug } from 'stellar-drive/utils';
 
   // ===========================================================================
@@ -113,6 +114,13 @@
       titleEl?.blur();
     }
   }
+
+  onDestroy(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = undefined;
+    }
+  });
 </script>
 
 <div class="note-title-wrapper">

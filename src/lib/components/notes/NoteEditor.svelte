@@ -248,11 +248,12 @@
   onDestroy(() => {
     debug('log', `[NoteEditor:${noteId}] Destroying editor`);
 
-    /* Flush any pending content change before destroy */
+    /* Clear pending content change timer — do NOT flush onContentChange here
+     * because the parent's data.note may already point to the new note after
+     * SvelteKit re-navigation, which would attribute the change to the wrong note. */
     if (debounceTimer) {
       clearTimeout(debounceTimer);
       debounceTimer = null;
-      onContentChange?.();
     }
 
     editor?.destroy();

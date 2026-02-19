@@ -64,27 +64,19 @@
   // ==========================================================================
 
   /** Current note title — synced from the CRDT meta Y.Map. */
-  let title = $state('Untitled');
+  let title = $state(data.note?.title ?? 'Untitled');
 
   /** Current note icon/emoji. */
-  let icon = $state('');
+  let icon = $state(data.note?.icon ?? '');
 
   /** Whether the note is locked (read-only mode). */
-  let isLocked = $state(false);
+  let isLocked = $state(data.note?.is_locked ?? false);
 
   /** Controls visibility of the move-note modal. */
   let showMoveModal = $state(false);
 
   /** Current breadcrumb trail for the note hierarchy. */
-  let breadcrumbs = $state<Note[]>([]);
-
-  /** Sync local state from page data when the note changes. */
-  $effect(() => {
-    title = data.note?.title ?? 'Untitled';
-    icon = data.note?.icon ?? '';
-    isLocked = data.note?.is_locked ?? false;
-    breadcrumbs = data.breadcrumbs ?? [];
-  });
+  let breadcrumbs = $state<Note[]>(data.breadcrumbs ?? []);
 
   // ==========================================================================
   //                           TITLE SYNC
@@ -142,12 +134,20 @@
   /**
    * Toggles the locked/read-only state of the current note.
    */
+  let lockInProgress = false;
   async function handleToggleLock(): Promise<void> {
-    if (!data.note) return;
+    if (!data.note || lockInProgress) return;
+    lockInProgress = true;
     debug('log', '[NoteEditor] Toggling lock for note:', data.note.id);
     const newLocked = !isLocked;
-    await toggleLock(data.note.id, newLocked);
-    isLocked = newLocked;
+    isLocked = newLocked; // Optimistic update
+    try {
+      await toggleLock(data.note.id, newLocked);
+    } catch {
+      isLocked = !newLocked; // Revert on failure
+    } finally {
+      lockInProgress = false;
+    }
   }
 
   /**
@@ -189,36 +189,36 @@
      Note Editor Page
      ═══════════════════════════════════════════════════════════════════════════ -->
 {#if data.note}
-  <div class="note-page">
-    <!-- ── Header: breadcrumbs, sync status, menu ── -->
-    <NoteHeader
-      noteId={data.note.id}
-      note={data.note}
-      {breadcrumbs}
-      {isLocked}
-      onTrash={handleTrash}
-      onToggleLock={handleToggleLock}
-      onMove={() => (showMoveModal = true)}
-    />
-
-    <!-- ── Editor Content Area ── -->
-    <div class="note-content">
-      <!-- ── Title / Icon ── -->
-      <NoteTitle
-        {title}
-        {icon}
+  {#key data.note.id}
+    <div class="note-page">
+      <!-- ── Header: breadcrumbs, sync status, menu ── -->
+      <NoteHeader
+        noteId={data.note.id}
+        note={data.note}
+        {breadcrumbs}
         {isLocked}
-        onTitleChange={handleTitleChange}
-        onIconChange={(newIcon) => {
-          icon = newIcon ?? '';
-          if (data.note) {
-            updateNoteMeta(data.note.id, { icon: newIcon });
-          }
-        }}
+        onTrash={handleTrash}
+        onToggleLock={handleToggleLock}
+        onMove={() => (showMoveModal = true)}
       />
 
-      <!-- ── Rich Text Editor — keyed to force recreation on note change ── -->
-      {#key data.note.id}
+      <!-- ── Editor Content Area ── -->
+      <div class="note-content">
+        <!-- ── Title / Icon ── -->
+        <NoteTitle
+          {title}
+          {icon}
+          {isLocked}
+          onTitleChange={handleTitleChange}
+          onIconChange={(newIcon) => {
+            icon = newIcon ?? '';
+            if (data.note) {
+              updateNoteMeta(data.note.id, { icon: newIcon });
+            }
+          }}
+        />
+
+        <!-- ── Rich Text Editor ── -->
         <NoteEditor
           ydoc={data.ydoc}
           meta={data.meta}
@@ -226,19 +226,19 @@
           {isLocked}
           onContentChange={handleContentChange}
         />
-      {/key}
-    </div>
+      </div>
 
-    <!-- ── Move Note Modal ── -->
-    {#if showMoveModal}
-      <MoveNoteModal
-        noteId={data.note.id}
-        isOpen={showMoveModal}
-        onMove={handleMove}
-        onClose={() => (showMoveModal = false)}
-      />
-    {/if}
-  </div>
+      <!-- ── Move Note Modal ── -->
+      {#if showMoveModal}
+        <MoveNoteModal
+          noteId={data.note.id}
+          isOpen={showMoveModal}
+          onMove={handleMove}
+          onClose={() => (showMoveModal = false)}
+        />
+      {/if}
+    </div>
+  {/key}
 {/if}
 
 <style>

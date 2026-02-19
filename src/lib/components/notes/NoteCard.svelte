@@ -9,6 +9,7 @@
   @prop {Note} note - The note to display.
 -->
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import type { Note } from '$lib/types';
 
   // ===========================================================================
@@ -22,6 +23,16 @@
   } = $props();
 
   // ===========================================================================
+  //  Reactive time ticker (updates every 60s)
+  // ===========================================================================
+
+  let now = $state(Date.now());
+  const ticker = setInterval(() => {
+    now = Date.now();
+  }, 60_000);
+  onDestroy(() => clearInterval(ticker));
+
+  // ===========================================================================
   //  Derived
   // ===========================================================================
 
@@ -29,7 +40,7 @@
 
   let relativeTime = $derived.by(() => {
     const editedMs = new Date(note.last_edited_at).getTime();
-    const diffSec = Math.floor((Date.now() - editedMs) / 1000);
+    const diffSec = Math.floor((now - editedMs) / 1000);
 
     if (diffSec < 60) return 'Just now';
     if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
