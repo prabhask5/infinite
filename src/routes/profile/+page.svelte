@@ -1053,12 +1053,14 @@
         {#each trustedDevices as device (device.id)}
           <div class="device-row" class:device-row--current={device.deviceId === currentDeviceId}>
             <div class="device-meta">
-              <span class="device-label">
-                {device.deviceLabel || 'Unknown Device'}
-              </span>
-              {#if device.deviceId === currentDeviceId}
-                <span class="device-badge">This Device</span>
-              {/if}
+              <div class="device-name-row">
+                <span class="device-label">
+                  {device.deviceLabel || 'Unknown Device'}
+                </span>
+                {#if device.deviceId === currentDeviceId}
+                  <span class="device-badge">This Device</span>
+                {/if}
+              </div>
               <span class="device-date"
                 >Last used {new Date(device.lastUsedAt).toLocaleDateString()}</span
               >
@@ -1082,46 +1084,9 @@
   <div class="section-reveal" style="animation-delay: 250ms">
     <p class="section-label">Settings</p>
     <div class="card">
-      <div class="setting-item">
-        <div>
-          <strong>Debug Mode</strong>
-          <p class="hint">Show debug tools below (refresh needed for full effect)</p>
-        </div>
-        <button
-          class="toggle"
-          class:on={debugMode}
-          onclick={toggleDebugMode}
-          role="switch"
-          aria-checked={debugMode}
-          aria-label="Toggle debug mode"
-        >
-          <span class="toggle-pip"></span>
-        </button>
-      </div>
-
-      <div class="setting-item">
-        <div>
-          <strong>Sign Out</strong>
-          <p class="hint">Lock your notes and return to login.</p>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick={handleMobileSignOut}>Sign Out</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section: Danger Zone -->
-  <div class="section-reveal" style="animation-delay: 300ms">
-    <p class="section-label section-label--danger">Danger Zone</p>
-    <div class="card card--danger">
-      <div class="setting-item danger">
-        <div>
-          <strong>Reset Database</strong>
-          <p class="hint">Delete all local data. This cannot be undone.</p>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick={handleResetDatabase} disabled={resetting}>
-          {resetting ? 'Resetting...' : 'Reset'}
-        </button>
-      </div>
+      <button class="btn btn-secondary" onclick={() => goto('/setup')}>
+        Update Supabase Configuration
+      </button>
     </div>
   </div>
 
@@ -1203,6 +1168,12 @@
           <span class="diag-kv-label">Events Processed</span>
           <span class="diag-kv-value">{diagnostics.realtime.recentlyProcessedCount}</span>
         </div>
+        {#if diagnostics.realtime.lastError}
+          <div class="diag-kv">
+            <span class="diag-kv-label">Last Error</span>
+            <span class="diag-kv-value diag-error-text">{diagnostics.realtime.lastError}</span>
+          </div>
+        {/if}
 
         <!-- 4. Data Transfer -->
         <div class="diag-heading">Data Transfer</div>
@@ -1350,69 +1321,122 @@
     </div>
   </div>
 
-  <!-- Section: Debug Tools (conditional) -->
-  {#if debugMode}
-    <div class="section-reveal" style="animation-delay: 400ms">
-      <p class="section-label section-label--debug">Debug Tools</p>
-      <div class="card card--debug">
-        <div class="debug-item">
-          <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
-            {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
-          </button>
-          <p class="hint">Resets sync cursor and re-downloads all data from the server.</p>
-        </div>
-
-        <div class="debug-item">
-          <button
-            class="btn btn-secondary"
-            onclick={handleTriggerSync}
-            disabled={triggeringSyncManual}
-          >
-            {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
-          </button>
-          <p class="hint">Manually triggers a push/pull sync cycle.</p>
-        </div>
-
-        <div class="debug-item">
-          <button
-            class="btn btn-secondary"
-            onclick={handleResetSyncCursor}
-            disabled={resettingCursor}
-          >
-            {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
-          </button>
-          <p class="hint">Resets cursor so the next sync pulls all data.</p>
-        </div>
-
-        <div class="debug-item">
-          <button
-            class="btn btn-secondary"
-            onclick={handleViewTombstones}
-            disabled={viewingTombstones}
-          >
-            {viewingTombstones ? 'Loading...' : 'View Tombstones'}
-          </button>
-          <p class="hint">Logs soft-deleted record counts per table to the console.</p>
-        </div>
-
-        <div class="debug-item">
-          <button
-            class="btn btn-secondary"
-            onclick={handleCleanupTombstones}
-            disabled={cleaningTombstones}
-          >
-            {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
-          </button>
+  <!-- Section: Debug Tools -->
+  <div class="section-reveal" style="animation-delay: 400ms">
+    <p class="section-label section-label--debug">Debug Tools</p>
+    <div class="card card--debug">
+      <div class="setting-item">
+        <div>
+          <strong>Debug Mode</strong>
           <p class="hint">
-            Permanently removes old soft-deleted records from local and server databases.
+            Enable console logging for troubleshooting (refresh needed for full effect)
           </p>
         </div>
+        <button
+          class="toggle"
+          class:on={debugMode}
+          onclick={toggleDebugMode}
+          role="switch"
+          aria-checked={debugMode}
+          aria-label="Toggle debug mode"
+        >
+          <span class="toggle-pip"></span>
+        </button>
+      </div>
+
+      <div class="debug-item">
+        <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
+          {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
+        </button>
+        <p class="hint">
+          Clears local table data, resets the sync cursor, and re-downloads everything from the
+          server without reloading the page.<br />
+          <span class="console-label">Run in console:</span>
+          <code class="console-cmd">__infiniteSync.forceFullSync()</code>
+        </p>
+      </div>
+
+      <div class="debug-item">
+        <button
+          class="btn btn-secondary"
+          onclick={handleTriggerSync}
+          disabled={triggeringSyncManual}
+        >
+          {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
+        </button>
+        <p class="hint">
+          Manually triggers a sync cycle to push local changes and pull remote changes.<br />
+          <span class="console-label">Run in console:</span>
+          <code class="console-cmd">__infiniteSync.sync()</code>
+        </p>
+      </div>
+
+      <div class="debug-item">
+        <button
+          class="btn btn-secondary"
+          onclick={handleResetSyncCursor}
+          disabled={resettingCursor}
+        >
+          {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
+        </button>
+        <p class="hint">
+          Resets the sync cursor so the next sync cycle pulls all data instead of only new changes.<br
+          />
+          <span class="console-label">Run in console:</span>
+          <code class="console-cmd">__infiniteSync.resetSyncCursor()</code>
+        </p>
+      </div>
+
+      <div class="debug-item">
+        <button
+          class="btn btn-secondary"
+          onclick={handleViewTombstones}
+          disabled={viewingTombstones}
+        >
+          {viewingTombstones ? 'Loading...' : 'View Tombstones'}
+        </button>
+        <p class="hint">
+          Logs soft-deleted record counts per table to the browser console.<br />
+          <span class="console-label">Run in console:</span>
+          <code class="console-cmd">__infiniteTombstones()</code>
+        </p>
+      </div>
+
+      <div class="debug-item">
+        <button
+          class="btn btn-secondary"
+          onclick={handleCleanupTombstones}
+          disabled={cleaningTombstones}
+        >
+          {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
+        </button>
+        <p class="hint">
+          Permanently removes old soft-deleted records from local IndexedDB and remote Supabase.<br
+          />
+          <span class="console-label">Run in console:</span>
+          <code class="console-cmd">__infiniteTombstones({'{'} cleanup: true })</code>
+        </p>
+      </div>
+
+      <div class="debug-item">
+        <button class="btn btn-danger" onclick={handleResetDatabase} disabled={resetting}>
+          {resetting ? 'Resetting...' : 'Reset Local Database'}
+        </button>
+        <p class="hint">
+          Deletes and recreates the entire IndexedDB database, then reloads the page. Use as a last
+          resort when the database is corrupted or Force Full Sync doesn't resolve the issue.
+        </p>
       </div>
     </div>
-  {/if}
+  </div>
+
+  <!-- Sign Out (mobile) -->
+  <div class="mobile-signout section-reveal" style="animation-delay: 450ms">
+    <button class="btn btn-secondary" onclick={handleMobileSignOut}>Sign Out</button>
+  </div>
 
   <!-- Footer -->
-  <div class="profile-footer section-reveal" style="animation-delay: 450ms">
+  <div class="profile-footer section-reveal" style="animation-delay: 500ms">
     <button class="btn btn-ghost" onclick={goBack}>Back to Home</button>
   </div>
 
@@ -1456,9 +1480,6 @@
     color: var(--color-text-muted);
     padding-left: 4px;
     margin: 0 0 8px;
-  }
-  .section-label--danger {
-    color: var(--color-red);
   }
   .section-label--debug {
     color: var(--color-text-muted);
@@ -1647,6 +1668,11 @@
     flex-direction: column;
     gap: 4px;
   }
+  .device-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .device-label {
     font-size: 0.875rem;
     font-weight: 500;
@@ -1695,10 +1721,6 @@
     margin: 4px 0 0;
     font-size: 0.8125rem;
   }
-  .setting-item.danger strong {
-    color: var(--color-red);
-  }
-
   /* Toggle switch */
   .toggle {
     position: relative;
@@ -1729,11 +1751,6 @@
     transform: translateX(20px);
   }
 
-  /* Danger card */
-  .card--danger {
-    border-left: 2px solid color-mix(in srgb, var(--color-red) 35%, transparent);
-  }
-
   /* Debug card */
   .card--debug {
     border-style: dashed;
@@ -1756,6 +1773,21 @@
     padding-left: 2px;
     font-size: 0.75rem;
     font-family: var(--font-mono);
+  }
+  .console-label {
+    opacity: 0.5;
+    font-size: 0.6875rem;
+  }
+  .console-cmd {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    background: var(--color-surface-alt, rgba(255, 255, 255, 0.05));
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--color-primary);
+  }
+  .mobile-signout {
+    text-align: center;
   }
 
   /* Modal */
@@ -1972,6 +2004,10 @@
     align-items: center;
     gap: 6px;
     text-align: right;
+  }
+  .diag-error-text {
+    color: var(--color-danger, #e53e3e);
+    word-break: break-word;
   }
   .diag-lock-dur {
     font-size: 0.6875rem;

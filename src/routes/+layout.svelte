@@ -1031,7 +1031,6 @@
   .sidebar-nav-item {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1044,10 +1043,6 @@
       background var(--duration-fast) ease,
       color var(--duration-fast) ease;
     min-height: 44px;
-  }
-
-  .sidebar:hover .sidebar-nav-item {
-    justify-content: flex-start;
   }
 
   .sidebar-nav-item:hover {
@@ -1092,14 +1087,9 @@
   }
 
   .sidebar-sync {
-    padding: 8px;
+    padding: 0 8px;
     display: flex;
     align-items: center;
-    justify-content: center;
-  }
-
-  .sidebar:hover .sidebar-sync {
-    justify-content: flex-start;
   }
 
   /* Override SyncStatus tooltip position inside the narrow sidebar rail */
@@ -1116,7 +1106,6 @@
   .sidebar-profile {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1127,10 +1116,6 @@
     white-space: nowrap;
     transition: background var(--duration-fast) ease;
     min-height: 44px;
-  }
-
-  .sidebar:hover .sidebar-profile {
-    justify-content: flex-start;
   }
 
   .sidebar-profile:hover {
@@ -1164,7 +1149,6 @@
   .sidebar-signout {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1181,10 +1165,6 @@
     min-height: 44px;
     width: 100%;
     text-align: left;
-  }
-
-  .sidebar:hover .sidebar-signout {
-    justify-content: flex-start;
   }
 
   .sidebar-signout svg {
