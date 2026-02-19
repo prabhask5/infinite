@@ -32,12 +32,23 @@
   import { resolveFirstName } from 'stellar-drive/auth';
   import { debug } from 'stellar-drive/utils';
 
+  /* ── SvelteKit Navigation ── */
+  import { goto } from '$app/navigation';
+
+  /* ── App Stores ── */
+  import { getRecentNotes, createNote } from '$lib/stores/notes';
+  import NoteCard from '$lib/components/notes/NoteCard.svelte';
+  import type { Note } from '$lib/types';
+
   // ==========================================================================
   //                           COMPONENT STATE
   // ==========================================================================
 
   /** Whether the page is still initialising (shows the loading spinner). */
   let isLoading = $state(true);
+
+  /** Recently edited notes for the quick access section. */
+  let recentNotes = $state<Note[]>([]);
 
   /** The currently displayed motivational message. */
   let selectedCompliment = $state('');
@@ -179,6 +190,12 @@
     isLoading = false;
     debug('log', '[Home] Page loaded, greeting:', timeGreeting);
 
+    /* Load recent notes for quick access */
+    getRecentNotes(5).then((notes) => {
+      recentNotes = notes;
+      debug('log', `[Home] Loaded ${notes.length} recent notes`);
+    });
+
     /* Subscribe to sync-completion events to detect overnight period changes */
     unsubscribeSyncComplete = onSyncComplete(() => {
       debug('log', '[Home] Sync complete, checking greeting period');
@@ -253,6 +270,45 @@
         Remember, {selectedCompliment}
       </p>
     </div>
+
+    <!-- ── Recent Notes Section ── -->
+    {#if recentNotes.length > 0}
+      <div class="recent-notes">
+        <div class="recent-header">
+          <h2 class="recent-title">Recent Notes</h2>
+          <a href="/notes" class="recent-view-all">View all</a>
+        </div>
+        <div class="recent-grid">
+          {#each recentNotes as note, i (note.id)}
+            <div class="recent-card-wrapper" style="animation-delay: {0.9 + 0.08 * i}s">
+              <NoteCard {note} />
+            </div>
+          {/each}
+        </div>
+        <button
+          class="new-note-btn"
+          onclick={async () => {
+            const n = await createNote();
+            if (n) goto(`/notes/${n.id}`);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            ><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg
+          >
+          New Note
+        </button>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -426,6 +482,84 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
+     RECENT NOTES SECTION
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .recent-notes {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+    opacity: 0;
+    animation: fadeSlideIn 0.7s var(--ease-out, ease-out) 0.85s forwards;
+  }
+
+  .recent-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .recent-title {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .recent-view-all {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .recent-view-all:hover {
+    opacity: 0.8;
+  }
+
+  .recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .recent-card-wrapper {
+    opacity: 0;
+    animation: fadeSlideIn 0.5s var(--ease-out, ease-out) forwards;
+  }
+
+  .new-note-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .new-note-btn:hover {
+    background: var(--color-primary-subtle);
+    border-color: var(--color-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
      ENTRANCE ANIMATIONS
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
@@ -497,6 +631,13 @@
 
     .greeting-salutation.greeting-transitioning {
       opacity: 0.4 !important;
+      transform: none;
+    }
+
+    .recent-notes,
+    .recent-card-wrapper {
+      animation: none;
+      opacity: 1;
       transform: none;
     }
   }

@@ -54,6 +54,7 @@ if (browser) {
     name: 'Infinite Notes',
     domain: window.location.origin,
     schema,
+    crdt: true,
     auth: { gateType: 'code' },
     demo: demoConfig,
     onAuthStateChange: (_event, _session) => {

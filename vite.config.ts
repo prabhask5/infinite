@@ -37,6 +37,10 @@ export default defineConfig({
             if (id.includes('@supabase')) return 'vendor-supabase';
             /** Dexie (IndexedDB wrapper) — offline-first storage layer */
             if (id.includes('dexie')) return 'vendor-dexie';
+            /** Tiptap + ProseMirror — rich text editor */
+            if (id.includes('tiptap') || id.includes('prosemirror')) return 'vendor-tiptap';
+            /** Yjs + y-prosemirror — CRDT collaboration layer */
+            if (id.includes('yjs') || id.includes('y-prosemirror')) return 'vendor-yjs';
           }
         }
       }

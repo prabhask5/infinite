@@ -15,5 +15,5 @@
   "sveltekit": {
     "config": "svelte.config.js"
   },
-  "ignoreDependencies": ["dexie", "stellar-drive", "postgres"]
+  "ignoreDependencies": ["dexie", "@tiptap/extension-collaboration-cursor", "y-prosemirror", "y-protocols"]
 }

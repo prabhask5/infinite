@@ -32,15 +32,18 @@ import type { SchemaDefinition } from 'stellar-drive/types';
  *   }
  */
 export const schema: SchemaDefinition = {
-  // Add your tables here. Example:
-  //
-  //   items: {
-  //     indexes: 'category_id, order',
-  //     fields: {
-  //       title: 'string',
-  //       completed: 'boolean',
-  //       category_id: 'uuid',
-  //       order: 'number',
-  //     },
-  //   }
+  notes: {
+    indexes: 'parent_note_id, order, is_trashed',
+    fields: {
+      title: 'string',
+      icon: 'string?',
+      parent_note_id: 'uuid?',
+      order: 'number',
+      last_edited_at: 'timestamp',
+      last_edited_by: 'string?',
+      created_by: 'string?',
+      is_locked: 'boolean',
+      is_trashed: 'boolean'
+    }
+  }
 };

@@ -419,7 +419,7 @@
 
       <!-- Navigation -->
       <nav class="sidebar-nav">
-        <a href="/" class="sidebar-nav-item" class:active={isActive('/')}>
+        <a href="/" class="sidebar-nav-item" class:active={$page.url.pathname === '/'}>
           <span class="sidebar-nav-icon">
             <svg
               width="20"
@@ -436,6 +436,26 @@
             </svg>
           </span>
           <span class="sidebar-nav-label">Home</span>
+        </a>
+        <a href="/notes" class="sidebar-nav-item" class:active={isActive('/notes')}>
+          <span class="sidebar-nav-icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          </span>
+          <span class="sidebar-nav-label">Notes</span>
         </a>
       </nav>
 
@@ -549,7 +569,12 @@
     </div>
 
     <nav class="drawer-nav">
-      <a href="/" class="drawer-nav-item" class:active={isActive('/')} onclick={closeSidebar}>
+      <a
+        href="/"
+        class="drawer-nav-item"
+        class:active={$page.url.pathname === '/'}
+        onclick={closeSidebar}
+      >
         <svg
           width="20"
           height="20"
@@ -564,6 +589,29 @@
           <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
         <span>Home</span>
+      </a>
+      <a
+        href="/notes"
+        class="drawer-nav-item"
+        class:active={isActive('/notes')}
+        onclick={closeSidebar}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+        <span>Notes</span>
       </a>
     </nav>
 
@@ -1083,13 +1131,18 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 0 12px 8px;
+    padding: 0 0 8px;
   }
 
   .sidebar-sync {
-    padding: 0 8px;
+    padding: 0;
+    padding-left: 10px;
     display: flex;
     align-items: center;
+  }
+
+  .sidebar:hover .sidebar-sync {
+    padding-left: 20px;
   }
 
   /* Override SyncStatus tooltip position inside the narrow sidebar rail */
@@ -1107,7 +1160,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 8px;
+    padding: 10px 18px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--color-text-secondary);
@@ -1116,6 +1169,10 @@
     white-space: nowrap;
     transition: background var(--duration-fast) ease;
     min-height: 44px;
+  }
+
+  .sidebar:hover .sidebar-profile {
+    padding-left: 20px;
   }
 
   .sidebar-profile:hover {
@@ -1150,7 +1207,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 8px;
+    padding: 10px 23px;
     border-radius: var(--radius-sm);
     border: none;
     background: none;
@@ -1174,6 +1231,10 @@
   .sidebar-signout:hover {
     background: rgba(239, 68, 68, 0.08);
     color: var(--color-red);
+  }
+
+  .sidebar:hover .sidebar-signout {
+    padding-left: 20px;
   }
 
   .sidebar-signout-label {

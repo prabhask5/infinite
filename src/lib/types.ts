@@ -30,4 +30,24 @@ export type { SyncStatus, AuthMode, OfflineCredentials } from 'stellar-drive/typ
 // Re-export all generated entity types (override individual ones below as needed)
 // export type { MyTable } from './types.generated';
 
-// TODO: Add app-specific type definitions and narrowings here
+// =============================================================================
+//  Note Entity
+// =============================================================================
+
+/** A note entity — metadata stored in the sync engine (Supabase Postgres). */
+export interface Note {
+  [key: string]: unknown;
+  id: string;
+  title: string;
+  icon: string | null;
+  parent_note_id: string | null;
+  order: number;
+  last_edited_at: string;
+  last_edited_by: string | null;
+  created_by: string | null;
+  is_locked: boolean;
+  is_trashed: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted: boolean;
+}
