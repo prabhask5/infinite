@@ -32,7 +32,7 @@
 
   /* ── Stellar Engine — Auth & Stores ── */
   import { lockSingleUser, resolveFirstName, resolveAvatarInitial } from 'stellar-drive/auth';
-  import { authState, hasHydrated, hydrationAttempted } from 'stellar-drive/stores';
+  import { authState, hasHydrated, wasDbReset } from 'stellar-drive/stores';
   import { debug } from 'stellar-drive/utils';
   import { hydrateAuthState } from 'stellar-drive/kit';
 
@@ -329,7 +329,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════════
      Loading Overlay — prevents flash during initial auth check
      ═══════════════════════════════════════════════════════════════════════════ -->
-{#if !hasHydrated() && !hydrationAttempted() && !isAuthPage}
+{#if ($authState.isLoading || (wasDbReset() && !hasHydrated())) && !isAuthPage}
   <div class="loading-overlay">
     <!-- Subtle paper grain texture -->
     <div class="loader-grain" aria-hidden="true"></div>
