@@ -815,26 +815,33 @@
   <title>Profile - Infinite Notes</title>
 </svelte:head>
 
-<!-- ═══ Page Container ═══ -->
-<div class="profile-page">
-  <div class="profile-container">
-    <!-- ═══ Section 1: Profile Header ═══ -->
-    <div class="profile-header card">
-      <div class="avatar">
-        {resolveAvatarInitial($authState?.session, $authState?.offlineProfile)}
+<!-- ═══ Notebook Page ═══ -->
+<div class="notebook-page">
+  <div class="notebook-content">
+    <!-- ═══ Profile Header ═══ -->
+    <header class="profile-header section-enter" style="animation-delay: 0ms">
+      <div class="avatar-ring">
+        <div class="avatar">
+          {resolveAvatarInitial($authState?.session, $authState?.offlineProfile)}
+        </div>
       </div>
-      <h1>{firstName} {lastName}</h1>
-      <p class="email-display">{currentEmail || 'No email set'}</p>
+      <h1 class="profile-name">{firstName} {lastName}</h1>
+      <p class="profile-email">{currentEmail || 'No email set'}</p>
+    </header>
+
+    <!-- ═══ Section: Edit Profile ═══ -->
+    <div class="ruling-divider section-enter" style="animation-delay: 60ms">
+      <span class="section-label">Profile</span>
+      <span class="ruling-line"></span>
     </div>
 
-    <!-- ═══ Section 2: Edit Profile ═══ -->
-    <div class="profile-section card">
-      <h2>Profile</h2>
+    <section class="notebook-section section-enter" style="animation-delay: 60ms">
       <form onsubmit={handleProfileSubmit}>
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First name</label>
             <input
+              class="ruled-input"
               type="text"
               id="firstName"
               bind:value={firstName}
@@ -845,6 +852,7 @@
           <div class="form-group">
             <label for="lastName">Last name</label>
             <input
+              class="ruled-input"
               type="text"
               id="lastName"
               bind:value={lastName}
@@ -866,19 +874,24 @@
           {profileLoading ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
+    </section>
+
+    <!-- ═══ Section: Change Email ═══ -->
+    <div class="ruling-divider section-enter" style="animation-delay: 120ms">
+      <span class="section-label">Email</span>
+      <span class="ruling-line"></span>
     </div>
 
-    <!-- ═══ Section 3: Change Email ═══ -->
-    <div class="profile-section card">
-      <h2>Email</h2>
+    <section class="notebook-section section-enter" style="animation-delay: 120ms">
       {#if currentEmail}
-        <p class="current-value">Current: {currentEmail}</p>
+        <p class="current-value">Current: <span class="current-value-text">{currentEmail}</span></p>
       {/if}
 
       <form onsubmit={handleEmailSubmit}>
         <div class="form-group">
           <label for="newEmail">New email address</label>
           <input
+            class="ruled-input"
             type="email"
             id="newEmail"
             bind:value={newEmail}
@@ -899,7 +912,7 @@
           {emailLoading ? 'Sending...' : 'Update Email'}
         </button>
       </form>
-    </div>
+    </section>
 
     <!-- ═══ Email Confirmation Modal ═══ -->
     {#if showEmailConfirmationModal}
@@ -945,9 +958,13 @@
       </div>
     {/if}
 
-    <!-- ═══ Section 4: Change Gate Code ═══ -->
-    <div class="profile-section card">
-      <h2>Change Gate Code</h2>
+    <!-- ═══ Section: Change Gate Code ═══ -->
+    <div class="ruling-divider section-enter" style="animation-delay: 180ms">
+      <span class="section-label">Gate Code</span>
+      <span class="ruling-line"></span>
+    </div>
+
+    <section class="notebook-section section-enter" style="animation-delay: 180ms">
       <p class="section-hint">Enter your current code and choose a new one.</p>
 
       <form onsubmit={handleCodeSubmit}>
@@ -1032,27 +1049,34 @@
           {codeLoading ? 'Updating...' : 'Update Gate Code'}
         </button>
       </form>
+    </section>
+
+    <!-- ═══ Section: Trusted Devices ═══ -->
+    <div class="ruling-divider section-enter" style="animation-delay: 240ms">
+      <span class="section-label">Trusted Devices</span>
+      <span class="ruling-line"></span>
     </div>
 
-    <!-- ═══ Section 5: Trusted Devices ═══ -->
-    <div class="profile-section card">
-      <h2>Trusted Devices</h2>
-
+    <section class="notebook-section section-enter" style="animation-delay: 240ms">
       {#if devicesLoading}
         <p class="section-hint">Loading devices...</p>
       {:else if trustedDevices.length === 0}
         <p class="empty-state">No trusted devices registered.</p>
       {:else}
         <div class="device-list">
-          {#each trustedDevices as device (device.id)}
-            <div class="device-item" class:current={device.deviceId === currentDeviceId}>
+          {#each trustedDevices as device, idx (device.id)}
+            <div
+              class="device-card"
+              class:device-card-current={device.deviceId === currentDeviceId}
+              style="transform: rotate({idx % 2 === 0 ? -0.6 : 0.4}deg)"
+            >
               <div class="device-info">
                 <span class="device-name">
                   {device.deviceLabel || 'Unknown Device'}
-                  {#if device.deviceId === currentDeviceId}
-                    <span class="badge">This device</span>
-                  {/if}
                 </span>
+                {#if device.deviceId === currentDeviceId}
+                  <span class="device-stamp">This Device</span>
+                {/if}
                 <span class="device-date"
                   >Last used {new Date(device.lastUsedAt).toLocaleDateString()}</span
                 >
@@ -1070,12 +1094,15 @@
           {/each}
         </div>
       {/if}
+    </section>
+
+    <!-- ═══ Section: Settings ═══ -->
+    <div class="ruling-divider section-enter" style="animation-delay: 300ms">
+      <span class="section-label">Settings</span>
+      <span class="ruling-line"></span>
     </div>
 
-    <!-- ═══ Section 6: Settings & Danger Zone ═══ -->
-    <div class="profile-section card danger-zone">
-      <h2>Settings</h2>
-
+    <section class="notebook-section section-enter" style="animation-delay: 300ms">
       <div class="setting-row">
         <div>
           <strong>Debug Mode</strong>
@@ -1093,6 +1120,22 @@
         </button>
       </div>
 
+      <div class="setting-row">
+        <div>
+          <strong>Sign Out</strong>
+          <p class="section-hint">Lock your notes and return to login.</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick={handleMobileSignOut}>Sign Out</button>
+      </div>
+    </section>
+
+    <!-- ═══ Danger Zone ═══ -->
+    <div class="ruling-divider ruling-divider-danger section-enter" style="animation-delay: 360ms">
+      <span class="section-label section-label-danger">Danger Zone</span>
+      <span class="ruling-line ruling-line-danger"></span>
+    </div>
+
+    <section class="notebook-section danger-section section-enter" style="animation-delay: 360ms">
       <div class="setting-row danger">
         <div>
           <strong>Reset Database</strong>
@@ -1102,19 +1145,15 @@
           {resetting ? 'Resetting...' : 'Reset'}
         </button>
       </div>
-
-      <div class="setting-row">
-        <div>
-          <strong>Sign Out</strong>
-          <p class="section-hint">Lock your notes and return to login.</p>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick={handleMobileSignOut}>Sign Out</button>
-      </div>
-    </div>
+    </section>
 
     <!-- ═══ Diagnostics Dashboard ═══ -->
-    <div class="profile-section card">
-      <h2>Diagnostics</h2>
+    <div class="ruling-divider section-enter" style="animation-delay: 420ms">
+      <span class="section-label">Diagnostics</span>
+      <span class="ruling-line"></span>
+    </div>
+
+    <section class="notebook-section diag-appendix section-enter" style="animation-delay: 420ms">
       <p class="section-hint">Live sync engine health dashboard</p>
 
       {#if diagnosticsLoading}
@@ -1339,62 +1378,77 @@
           Updated {formatTimestamp(diagnostics.timestamp)}
         </div>
       {/if}
-    </div>
+    </section>
 
-    <!-- ═══ Section 7: Debug Tools (conditional) ═══ -->
+    <!-- ═══ Section: Debug Tools (conditional) ═══ -->
     {#if debugMode}
-      <div class="profile-section card debug-section">
-        <h2>Debug Tools</h2>
-
-        <div class="debug-actions">
-          <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
-            {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
-          </button>
-          <p class="section-hint">Resets sync cursor and re-downloads all data from the server.</p>
-
-          <button
-            class="btn btn-secondary"
-            onclick={handleTriggerSync}
-            disabled={triggeringSyncManual}
-          >
-            {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
-          </button>
-          <p class="section-hint">Manually triggers a push/pull sync cycle.</p>
-
-          <button
-            class="btn btn-secondary"
-            onclick={handleResetSyncCursor}
-            disabled={resettingCursor}
-          >
-            {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
-          </button>
-          <p class="section-hint">Resets cursor so the next sync pulls all data.</p>
-
-          <button
-            class="btn btn-secondary"
-            onclick={handleViewTombstones}
-            disabled={viewingTombstones}
-          >
-            {viewingTombstones ? 'Loading...' : 'View Tombstones'}
-          </button>
-          <p class="section-hint">Logs soft-deleted record counts per table to the console.</p>
-
-          <button
-            class="btn btn-secondary"
-            onclick={handleCleanupTombstones}
-            disabled={cleaningTombstones}
-          >
-            {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
-          </button>
-          <p class="section-hint">
-            Permanently removes old soft-deleted records from local and server databases.
-          </p>
-        </div>
+      <div class="ruling-divider section-enter" style="animation-delay: 480ms">
+        <span class="section-label section-label-debug">Developer's Notebook</span>
+        <span class="ruling-line ruling-line-debug"></span>
       </div>
+
+      <section class="notebook-section debug-section section-enter" style="animation-delay: 480ms">
+        <div class="debug-actions">
+          <div class="debug-tool">
+            <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
+              {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
+            </button>
+            <p class="section-hint">
+              Resets sync cursor and re-downloads all data from the server.
+            </p>
+          </div>
+
+          <div class="debug-tool">
+            <button
+              class="btn btn-secondary"
+              onclick={handleTriggerSync}
+              disabled={triggeringSyncManual}
+            >
+              {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
+            </button>
+            <p class="section-hint">Manually triggers a push/pull sync cycle.</p>
+          </div>
+
+          <div class="debug-tool">
+            <button
+              class="btn btn-secondary"
+              onclick={handleResetSyncCursor}
+              disabled={resettingCursor}
+            >
+              {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
+            </button>
+            <p class="section-hint">Resets cursor so the next sync pulls all data.</p>
+          </div>
+
+          <div class="debug-tool">
+            <button
+              class="btn btn-secondary"
+              onclick={handleViewTombstones}
+              disabled={viewingTombstones}
+            >
+              {viewingTombstones ? 'Loading...' : 'View Tombstones'}
+            </button>
+            <p class="section-hint">Logs soft-deleted record counts per table to the console.</p>
+          </div>
+
+          <div class="debug-tool">
+            <button
+              class="btn btn-secondary"
+              onclick={handleCleanupTombstones}
+              disabled={cleaningTombstones}
+            >
+              {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
+            </button>
+            <p class="section-hint">
+              Permanently removes old soft-deleted records from local and server databases.
+            </p>
+          </div>
+        </div>
+      </section>
     {/if}
 
-    <!-- ═══ Footer Links ═══ -->
-    <div class="profile-footer">
+    <!-- ═══ Footer ═══ -->
+    <div class="notebook-footer section-enter" style="animation-delay: 540ms">
       <button class="btn btn-ghost" onclick={goBack}>Back to Home</button>
     </div>
   </div>
@@ -1406,20 +1460,37 @@
 
 <style>
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     PROFILE PAGE LAYOUT
+     NOTEBOOK PAGE LAYOUT
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  .profile-page {
+  .notebook-page {
     padding: var(--space-6) var(--space-4);
-    max-width: 640px;
+    max-width: 620px;
     margin: 0 auto;
-    animation: pageEnter var(--duration-normal) var(--ease-out);
   }
 
-  .profile-container {
+  .notebook-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     SECTION ENTRANCE ANIMATION
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .section-enter {
+    animation: sectionFadeUp var(--duration-normal) var(--ease-out) both;
+  }
+
+  @keyframes sectionFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
@@ -1428,19 +1499,34 @@
 
   .profile-header {
     text-align: center;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8) 0 var(--space-6);
   }
 
-  .profile-header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--color-text);
+  .avatar-ring {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    margin: 0 auto var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(
+      from 180deg,
+      var(--color-primary-light),
+      var(--color-primary),
+      var(--color-primary-dark),
+      var(--color-primary),
+      var(--color-primary-light)
+    );
+    padding: 3px;
+    box-shadow:
+      0 0 20px var(--color-primary-glow),
+      var(--shadow-md);
   }
 
   .avatar {
-    width: 80px;
-    height: 80px;
+    width: 82px;
+    height: 82px;
     border-radius: 50%;
     background: var(--gradient-primary);
     color: white;
@@ -1449,65 +1535,164 @@
     justify-content: center;
     font-size: 2rem;
     font-weight: 600;
-    margin: 0 auto var(--space-4);
-    box-shadow: var(--shadow-md);
+    font-family: var(--font-display);
   }
 
-  .email-display {
+  .profile-name {
+    font-size: 1.625rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .profile-email {
     font-size: 0.875rem;
     color: var(--color-text-muted);
     margin: var(--space-1) 0 0;
+    letter-spacing: 0.01em;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     CARD SECTIONS
+     RULING DIVIDER — Notebook section headers
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  .profile-section {
-    padding: var(--space-6);
+  .ruling-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-1);
   }
 
-  .profile-section h2 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin: 0 0 var(--space-4);
-    color: var(--color-text);
+  .section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-primary);
+    white-space: nowrap;
+    font-variant: small-caps;
+    font-family: var(--font-display);
+  }
+
+  .ruling-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--color-primary-subtle), transparent);
+  }
+
+  .section-label-danger {
+    color: var(--color-red);
+  }
+
+  .ruling-line-danger {
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-red) 30%, transparent),
+      transparent
+    );
+  }
+
+  .section-label-debug {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-variant: normal;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ruling-line-debug {
+    height: 1px;
+    border: none;
+    background: repeating-linear-gradient(
+      to right,
+      var(--color-border),
+      var(--color-border) 4px,
+      transparent 4px,
+      transparent 8px
+    );
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     FORM ELEMENTS
+     NOTEBOOK SECTIONS — continuous page feel
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .notebook-section {
+    padding: var(--space-4) 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     FORM ELEMENTS — ruled-line style
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
+    gap: var(--space-4);
   }
 
   .form-group {
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .form-group label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--color-text-secondary);
     margin-bottom: var(--space-1);
+    letter-spacing: 0.01em;
   }
 
   .form-group input {
     width: 100%;
   }
 
+  .ruled-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--color-border);
+    border-radius: 0;
+    padding: var(--space-2) var(--space-1);
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+    outline: none;
+  }
+
+  .ruled-input:focus {
+    border-bottom-color: var(--color-primary);
+    box-shadow: 0 2px 8px var(--color-primary-glow);
+  }
+
+  .ruled-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.5;
+  }
+
+  .ruled-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .current-value {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--color-text-secondary);
     margin: 0 0 var(--space-3);
   }
 
+  .current-value-text {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text);
+  }
+
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     DIGIT CODE INPUTS
+     DIGIT CODE INPUTS — typewriter key / combination lock style
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .digit-row {
@@ -1518,24 +1703,31 @@
   }
 
   .digit-input {
-    width: 44px;
-    height: 52px;
+    width: 46px;
+    height: 54px;
     text-align: center;
-    font-size: 1.25rem;
+    font-size: 1.375rem;
     font-family: var(--font-mono);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg);
+    font-weight: 700;
+    letter-spacing: 0;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
     color: var(--color-text);
+    box-shadow: var(--shadow-sm), var(--shadow-inset);
     transition:
-      border-color var(--duration-fast),
-      box-shadow var(--duration-fast);
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
   }
 
   .digit-input:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-glow);
+    box-shadow:
+      0 0 0 3px var(--color-primary-glow),
+      var(--shadow-sm);
     outline: none;
+    transform: translateY(-1px);
   }
 
   .digit-input:disabled {
@@ -1544,9 +1736,10 @@
   }
 
   .section-hint {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
     margin: 0 0 var(--space-3);
+    line-height: 1.5;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
@@ -1555,62 +1748,76 @@
 
   .error-message {
     color: var(--color-red);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     margin: var(--space-2) 0;
+    font-weight: 500;
   }
 
   .success-message {
     color: var(--color-green);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     margin: var(--space-2) 0;
+    font-weight: 500;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     TRUSTED DEVICES
+     TRUSTED DEVICES — index card style
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .device-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
 
-  .device-item {
+  .device-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-3);
+    padding: var(--space-4);
     border-radius: var(--radius-sm);
     background: var(--color-bg-secondary);
-    transition: background var(--duration-fast);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
   }
 
-  .device-item.current {
-    border-left: 3px solid var(--color-primary);
+  .device-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .device-card-current {
+    border-color: var(--color-primary-subtle);
+    background: color-mix(in srgb, var(--color-primary-subtle) 20%, var(--color-bg-secondary));
   }
 
   .device-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .device-name {
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
   }
 
-  .badge {
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background: var(--color-primary-subtle);
+  .device-stamp {
+    display: inline-block;
+    width: fit-content;
+    font-size: 0.5625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
     color: var(--color-primary);
-    font-weight: 500;
+    border: 1.5px solid var(--color-primary);
+    border-radius: var(--radius-xs);
+    padding: 1px 6px;
+    transform: rotate(-2deg);
+    opacity: 0.85;
   }
 
   .device-date {
@@ -1623,10 +1830,11 @@
     color: var(--color-text-muted);
     text-align: center;
     padding: var(--space-4) 0;
+    font-style: italic;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     SETTINGS / DANGER ZONE
+     SETTINGS ROWS
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .setting-row {
@@ -1656,12 +1864,18 @@
     color: var(--color-red);
   }
 
-  .danger-zone {
-    border: 1px solid var(--color-border);
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     DANGER SECTION — red margin line
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .danger-section {
+    border-left: 2px solid color-mix(in srgb, var(--color-red) 40%, transparent);
+    padding-left: var(--space-4);
+    margin-left: var(--space-1);
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     TOGGLE BUTTON (Debug Mode)
+     TOGGLE BUTTON
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .toggle-btn {
@@ -1672,7 +1886,7 @@
     border: none;
     background: var(--color-bg-tertiary);
     cursor: pointer;
-    transition: background var(--duration-fast);
+    transition: background var(--duration-fast) var(--ease-out);
     flex-shrink: 0;
   }
 
@@ -1697,26 +1911,43 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     DEBUG TOOLS
+     DEBUG TOOLS — Developer's Notebook aesthetic
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .debug-section {
     border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+    background: var(--color-bg-secondary);
   }
 
   .debug-actions {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
 
-  .debug-actions .btn {
+  .debug-tool {
+    padding: var(--space-2) 0;
+    border-bottom: 1px dashed var(--color-border);
+  }
+
+  .debug-tool:last-child {
+    border-bottom: none;
+  }
+
+  .debug-tool .btn {
     width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
   }
 
-  .debug-actions .section-hint {
-    margin: 0 0 var(--space-3);
+  .debug-tool .section-hint {
+    margin: var(--space-1) 0 0;
     padding-left: var(--space-1);
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
@@ -1754,6 +1985,7 @@
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
   }
 
   .modal-text {
@@ -1776,85 +2008,65 @@
      FOOTER
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  .profile-footer {
+  .notebook-footer {
     text-align: center;
-    padding: var(--space-4) 0;
+    padding: var(--space-6) 0 var(--space-4);
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     RESPONSIVE
+     DIAGNOSTICS — technical appendix with graph paper texture
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  @media (max-width: 480px) {
-    .profile-page {
-      padding: var(--space-4) var(--space-3);
-    }
-
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .digit-input {
-      width: 38px;
-      height: 46px;
-      font-size: 1.125rem;
-    }
-
-    .diag-stat-value {
-      font-size: 0.9375rem;
-    }
-    .diag-grid-2 {
-      grid-template-columns: 1fr;
-    }
-    .diag-cycle-stats {
-      flex-wrap: wrap;
-    }
-    .diag-table-tag {
-      font-size: 0.625rem;
-    }
+  .diag-appendix {
+    background:
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -1px -1px;
+    padding: var(--space-4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
   }
-
-  /* ═══ DIAGNOSTICS DASHBOARD ═══ */
 
   .diag-status-banner {
     display: flex;
     align-items: center;
     gap: 0.875rem;
-    padding: 1rem 1.25rem;
-    background: var(--color-bg-secondary);
+    padding: 0.875rem 1rem;
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
   }
 
   .diag-status-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
   }
 
   .diag-status-dot--green {
-    background: #26de81;
-    box-shadow: 0 0 12px rgba(38, 222, 129, 0.5);
+    background: var(--color-green);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-green) 50%, transparent);
     animation: statusPulse 3s ease-in-out infinite;
   }
 
   .diag-status-dot--blue {
     background: var(--color-primary);
-    box-shadow: 0 0 12px rgba(74, 125, 255, 0.5);
+    box-shadow: 0 0 8px var(--color-primary-glow);
     animation: statusPulse 1s ease-in-out infinite;
   }
 
   .diag-status-dot--yellow {
     background: #ffd43b;
-    box-shadow: 0 0 12px rgba(255, 212, 59, 0.5);
+    box-shadow: 0 0 8px rgba(255, 212, 59, 0.4);
     animation: statusPulse 2s ease-in-out infinite;
   }
 
   .diag-status-dot--red {
-    background: #ff6b6b;
-    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+    background: var(--color-red);
+    box-shadow: 0 0 8px var(--color-red-glow);
     animation: statusPulse 0.8s ease-in-out infinite;
   }
 
@@ -1877,61 +2089,64 @@
   }
 
   .diag-status-label {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--color-text);
   }
 
   .diag-status-meta {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--color-text-muted);
+    font-family: var(--font-mono);
   }
 
   .diag-section-title {
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     color: var(--color-text-muted);
-    margin: 1.25rem 0 0.625rem;
+    margin: 1.25rem 0 0.5rem;
+    font-family: var(--font-mono);
   }
 
   .diag-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.625rem;
+    gap: 0.5rem;
   }
 
   .diag-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.625rem;
+    gap: 0.5rem;
   }
 
   .diag-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.75rem 0.5rem;
-    background: var(--color-bg-secondary);
+    gap: 0.1875rem;
+    padding: 0.625rem 0.375rem;
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-xs);
     font-variant-numeric: tabular-nums;
   }
 
   .diag-stat-value {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--color-text);
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 
   .diag-stat-label {
-    font-size: 0.625rem;
+    font-size: 0.5625rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     color: var(--color-text-muted);
   }
 
@@ -1943,42 +2158,44 @@
 
   .diag-badges {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.625rem;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
     flex-wrap: wrap;
   }
 
   .diag-badge-ok {
     display: inline-flex;
-    padding: 0.2rem 0.625rem;
-    font-size: 0.6875rem;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: var(--radius-sm);
-    color: #26de81;
-    background: rgba(38, 222, 129, 0.12);
-    border: 1px solid rgba(38, 222, 129, 0.25);
+    letter-spacing: 0.06em;
+    border-radius: var(--radius-xs);
+    color: var(--color-green);
+    background: color-mix(in srgb, var(--color-green) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-green) 25%, transparent);
+    font-family: var(--font-mono);
   }
 
   .diag-badge-warn {
     display: inline-flex;
-    padding: 0.2rem 0.625rem;
-    font-size: 0.6875rem;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: var(--radius-sm);
+    letter-spacing: 0.06em;
+    border-radius: var(--radius-xs);
     color: #ffd43b;
     background: rgba(255, 212, 59, 0.12);
     border: 1px solid rgba(255, 212, 59, 0.25);
+    font-family: var(--font-mono);
   }
 
   .diag-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0;
+    padding: 0.4375rem 0;
     border-bottom: 1px solid var(--color-border);
     font-variant-numeric: tabular-nums;
     gap: 0.75rem;
@@ -1989,13 +2206,14 @@
   }
 
   .diag-row-label {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--color-text-muted);
     flex-shrink: 0;
+    font-family: var(--font-mono);
   }
 
   .diag-row-value {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--color-text);
     display: flex;
@@ -2003,16 +2221,17 @@
     gap: 0.375rem;
     min-width: 0;
     text-align: right;
+    font-family: var(--font-mono);
   }
 
   .diag-lock-duration {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 400;
     color: var(--color-text-muted);
   }
 
   .diag-config-tables {
-    padding: 0.5rem 0;
+    padding: 0.4375rem 0;
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -2020,60 +2239,60 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
   }
 
   .diag-config-table-names {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
+    gap: 0.3125rem;
   }
 
   .diag-table-tag {
     display: inline-flex;
-    padding: 0.1875rem 0.5rem;
-    font-size: 0.6875rem;
+    padding: 0.125rem 0.4375rem;
+    font-size: 0.625rem;
     font-weight: 600;
     font-family: var(--font-mono);
     color: var(--color-primary);
-    background: rgba(74, 125, 255, 0.1);
-    border: 1px solid rgba(74, 125, 255, 0.2);
-    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+    border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+    border-radius: var(--radius-xs);
   }
 
   .diag-inline-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
   }
 
   .diag-inline-dot--green {
-    background: #26de81;
-    box-shadow: 0 0 6px rgba(38, 222, 129, 0.4);
+    background: var(--color-green);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--color-green) 40%, transparent);
   }
 
   .diag-inline-dot--yellow {
     background: #ffd43b;
-    box-shadow: 0 0 6px rgba(255, 212, 59, 0.4);
+    box-shadow: 0 0 4px rgba(255, 212, 59, 0.4);
   }
 
   .diag-inline-dot--red {
-    background: #ff6b6b;
-    box-shadow: 0 0 6px rgba(255, 107, 107, 0.4);
+    background: var(--color-red);
+    box-shadow: 0 0 4px var(--color-red-glow);
   }
 
   .diag-table-bars {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
-    margin-top: 0.75rem;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
   }
 
   .diag-table-row {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.1875rem;
   }
 
   .diag-table-header {
@@ -2083,91 +2302,97 @@
   }
 
   .diag-table-name {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--color-text);
+    font-family: var(--font-mono);
   }
 
   .diag-table-pct {
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     font-weight: 600;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 
   .diag-progress-bar {
-    height: 6px;
-    background: rgba(74, 125, 255, 0.1);
-    border-radius: 3px;
+    height: 4px;
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    border-radius: 2px;
     overflow: hidden;
   }
 
   .diag-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), rgba(74, 125, 255, 0.6));
-    border-radius: 3px;
-    transition: width 600ms ease-out;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    border-radius: 2px;
+    transition: width 600ms var(--ease-out);
   }
 
   .diag-cycles {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.375rem;
   }
 
   .diag-cycle-item {
-    padding: 0.625rem 0.875rem;
-    background: var(--color-bg-secondary);
-    border-left: 3px solid rgba(74, 125, 255, 0.4);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border-left: 2px solid var(--color-primary-subtle);
+    border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   }
 
   .diag-cycle-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.1875rem;
   }
 
   .diag-cycle-trigger {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     color: var(--color-primary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-family: var(--font-mono);
   }
 
   .diag-cycle-time {
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 
   .diag-cycle-stats {
     display: flex;
-    gap: 0.75rem;
-    font-size: 0.6875rem;
+    gap: 0.625rem;
+    font-size: 0.625rem;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 
   .diag-error-banner {
-    padding: 0.75rem 1rem;
-    background: rgba(255, 107, 107, 0.08);
-    border: 1px solid rgba(255, 107, 107, 0.2);
-    border-radius: var(--radius-md);
-    font-size: 0.8125rem;
+    padding: 0.625rem 0.875rem;
+    background: color-mix(in srgb, var(--color-red) 8%, var(--color-bg));
+    border: 1px solid color-mix(in srgb, var(--color-red) 20%, transparent);
+    border-radius: var(--radius-xs);
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--color-red);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
+    font-family: var(--font-mono);
   }
 
   .diag-error-item {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 107, 107, 0.1);
+    padding: 0.375rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-red) 10%, transparent);
   }
 
   .diag-error-item:last-child {
@@ -2175,35 +2400,38 @@
   }
 
   .diag-error-table {
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     font-weight: 700;
     color: var(--color-red);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-family: var(--font-mono);
   }
 
   .diag-error-msg {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--color-text-muted);
+    font-family: var(--font-mono);
   }
 
   .diag-footer {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-    padding-top: 0.75rem;
+    gap: 0.375rem;
+    margin-top: 1rem;
+    padding-top: 0.625rem;
     border-top: 1px solid var(--color-border);
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 
   .diag-footer-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: rgba(74, 125, 255, 0.5);
+    background: var(--color-primary-subtle);
     animation: footerTick 2.5s ease-in-out infinite;
   }
 
@@ -2217,6 +2445,10 @@
     }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     DEMO TOAST
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
   .demo-toast {
     position: fixed;
     top: 50%;
@@ -2224,7 +2456,7 @@
     transform: translate(-50%, -50%);
     z-index: 9500;
     padding: 1rem 2rem;
-    background: rgba(74, 125, 255, 0.9);
+    background: color-mix(in srgb, var(--color-primary) 90%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-xl);
     backdrop-filter: blur(20px);
@@ -2234,10 +2466,8 @@
     font-weight: 600;
     white-space: nowrap;
     text-align: center;
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      0 0 60px rgba(74, 125, 255, 0.2);
-    animation: demoToastIn 0.3s ease-out;
+    box-shadow: var(--shadow-xl);
+    animation: demoToastIn 0.3s var(--ease-out);
     pointer-events: none;
   }
 
@@ -2252,7 +2482,50 @@
     }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     RESPONSIVE
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  @media (max-width: 480px) {
+    .notebook-page {
+      padding: var(--space-4) var(--space-3);
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .digit-input {
+      width: 40px;
+      height: 48px;
+      font-size: 1.1875rem;
+    }
+
+    .diag-stat-value {
+      font-size: 0.875rem;
+    }
+
+    .diag-grid-2 {
+      grid-template-columns: 1fr;
+    }
+
+    .diag-cycle-stats {
+      flex-wrap: wrap;
+    }
+
+    .diag-table-tag {
+      font-size: 0.5625rem;
+    }
+
+    .diag-appendix {
+      background-size: 16px 16px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .section-enter {
+      animation: none;
+    }
     .diag-status-dot,
     .diag-footer-dot {
       animation: none;

@@ -63,12 +63,12 @@
      ═══════════════════════════════════════════════════════════════════════════════ */
 
   /* Dark Paper — The writing surface beneath the notes.
-     Near-black base to soft elevated card surfaces. Grayscale, not tinted. */
-  --color-void: #0c0c0e;
-  --color-bg: #121214;
-  --color-bg-secondary: #1a1a1e;
-  --color-bg-tertiary: #222226;
-  --color-bg-elevated: #2a2a30;
+     Warm gray base (Notion-style) to soft elevated card surfaces. */
+  --color-void: #111111;
+  --color-bg: #191919;
+  --color-bg-secondary: #202020;
+  --color-bg-tertiary: #2a2a2a;
+  --color-bg-elevated: #303030;
 
   /* Ink on Paper — Text that reads clearly.
      Three luminance levels for content hierarchy. Warm whites, not cool blue-white. */

@@ -1062,7 +1062,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 12px;
+    margin-left: 10px;
   }
 
   .sidebar:hover .sidebar-nav-icon {
@@ -1103,6 +1103,17 @@
     padding-left: 8px;
   }
 
+  /* Override SyncStatus tooltip position inside the narrow sidebar rail */
+  .sidebar-sync :global(.tooltip) {
+    right: auto;
+    left: 0;
+  }
+
+  .sidebar-sync :global(.tooltip-arrow) {
+    right: auto;
+    left: 16px;
+  }
+
   .sidebar-profile {
     display: flex;
     align-items: center;
@@ -1135,7 +1146,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     flex-shrink: 0;
-    margin-left: 8px;
+    margin-left: 6px;
   }
 
   .sidebar:hover .sidebar-avatar {
@@ -1174,7 +1185,7 @@
 
   .sidebar-signout svg {
     flex-shrink: 0;
-    margin-left: 12px;
+    margin-left: 11px;
   }
 
   .sidebar:hover .sidebar-signout svg {
