@@ -15,5 +15,5 @@
   "sveltekit": {
     "config": "svelte.config.js"
   },
-  "ignoreDependencies": ["dexie", "@tiptap/extension-collaboration-cursor", "y-prosemirror", "y-protocols"]
+  "ignoreDependencies": ["dexie", "y-prosemirror", "y-protocols"]
 }
