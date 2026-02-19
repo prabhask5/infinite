@@ -464,9 +464,6 @@
 
       <!-- Footer -->
       <div class="sidebar-footer">
-        <div class="sidebar-sync">
-          <SyncStatus />
-        </div>
         <a href="/profile" class="sidebar-profile">
           <span class="sidebar-avatar">{avatarInitial}</span>
           <span class="sidebar-greeting">Hey, {firstName}!</span>
@@ -618,9 +615,6 @@
     <div class="drawer-spacer"></div>
 
     <div class="drawer-footer">
-      <div class="drawer-sync">
-        <SyncStatus />
-      </div>
       <a href="/profile" class="drawer-profile" onclick={closeSidebar}>
         <span class="drawer-avatar">{avatarInitial}</span>
         <span>Hey, {firstName}!</span>
@@ -644,6 +638,15 @@
       </button>
     </div>
   </aside>
+{/if}
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     Desktop Sync Status — fixed top-right indicator
+     ═══════════════════════════════════════════════════════════════════════════ -->
+{#if isAuthenticated}
+  <div class="desktop-sync">
+    <SyncStatus />
+  </div>
 {/if}
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
@@ -1130,37 +1133,15 @@
   .sidebar-footer {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 0 0 8px;
-  }
-
-  .sidebar-sync {
-    padding: 0;
-    padding-left: 10px;
-    display: flex;
-    align-items: center;
-  }
-
-  .sidebar:hover .sidebar-sync {
-    padding-left: 20px;
-  }
-
-  /* Override SyncStatus tooltip position inside the narrow sidebar rail */
-  .sidebar-sync :global(.tooltip) {
-    right: auto;
-    left: 0;
-  }
-
-  .sidebar-sync :global(.tooltip-arrow) {
-    right: auto;
-    left: 16px;
+    gap: 2px;
+    padding: 0 12px 8px;
   }
 
   .sidebar-profile {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 18px;
+    padding: 10px 8px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--color-text-secondary);
@@ -1169,10 +1150,6 @@
     white-space: nowrap;
     transition: background var(--duration-fast) ease;
     min-height: 44px;
-  }
-
-  .sidebar:hover .sidebar-profile {
-    padding-left: 20px;
   }
 
   .sidebar-profile:hover {
@@ -1207,7 +1184,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 23px;
+    padding: 10px 8px;
     border-radius: var(--radius-sm);
     border: none;
     background: none;
@@ -1233,10 +1210,6 @@
     color: var(--color-red);
   }
 
-  .sidebar:hover .sidebar-signout {
-    padding-left: 20px;
-  }
-
   .sidebar-signout-label {
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -1244,6 +1217,29 @@
 
   .sidebar:hover .sidebar-signout-label {
     opacity: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     DESKTOP SYNC STATUS — fixed top-right indicator
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .desktop-sync {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 101;
+    display: none;
+  }
+
+  /* Override tooltip to open to the left (not right) since we're in the top-right corner */
+  .desktop-sync :global(.tooltip) {
+    right: 0;
+    left: auto;
+  }
+
+  .desktop-sync :global(.tooltip-arrow) {
+    right: 16px;
+    left: auto;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
@@ -1411,10 +1407,6 @@
     border-top: 1px solid var(--color-border);
   }
 
-  .drawer-sync {
-    padding: 8px 12px;
-  }
-
   .drawer-profile {
     display: flex;
     align-items: center;
@@ -1505,6 +1497,10 @@
   /* Desktop (>= 768px): Show sidebar rail, hide mobile header + drawer */
   @media (min-width: 768px) {
     .sidebar {
+      display: block;
+    }
+
+    .desktop-sync {
       display: block;
     }
 
