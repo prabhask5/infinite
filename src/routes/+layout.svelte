@@ -32,7 +32,7 @@
 
   /* ── Stellar Engine — Auth & Stores ── */
   import { lockSingleUser, resolveFirstName, resolveAvatarInitial } from 'stellar-drive/auth';
-  import { authState, hasHydrated } from 'stellar-drive/stores';
+  import { authState, hasHydrated, hydrationAttempted } from 'stellar-drive/stores';
   import { debug } from 'stellar-drive/utils';
   import { hydrateAuthState } from 'stellar-drive/kit';
 
@@ -329,7 +329,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════════
      Loading Overlay — prevents flash during initial auth check
      ═══════════════════════════════════════════════════════════════════════════ -->
-{#if !hasHydrated() && !isAuthPage}
+{#if !hasHydrated() && !hydrationAttempted() && !isAuthPage}
   <div class="loading-overlay">
     <!-- Subtle paper grain texture -->
     <div class="loader-grain" aria-hidden="true"></div>
@@ -344,19 +344,21 @@
 
       <!-- Pen nib writing a line -->
       <div class="pen-line" aria-hidden="true">
-        <svg
-          class="pen-nib"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-        </svg>
+        <div class="pen-nib-wrapper">
+          <svg
+            class="pen-nib"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          </svg>
+        </div>
         <div class="ink-trail"></div>
       </div>
 
@@ -764,18 +766,24 @@
   .pen-line {
     position: relative;
     width: 120px;
-    height: 20px;
+    height: 24px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+  }
+
+  /* Wrapper positions the pen so its tip (bottom-left of SVG) aligns with the ink trail */
+  .pen-nib-wrapper {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    animation: penMove 2.4s var(--ease-in-out) infinite;
+    z-index: 2;
   }
 
   .pen-nib {
-    position: absolute;
-    left: 0;
+    display: block;
     color: var(--color-primary);
     filter: drop-shadow(0 0 6px var(--color-primary-glow));
-    animation: penMove 2.4s var(--ease-in-out) infinite;
-    z-index: 2;
   }
 
   @keyframes penMove {
@@ -787,23 +795,23 @@
       opacity: 1;
     }
     70% {
-      left: calc(100% - 18px);
+      left: calc(100% - 2px);
       opacity: 1;
     }
     85% {
       opacity: 0;
     }
     100% {
-      left: calc(100% - 18px);
+      left: calc(100% - 2px);
       opacity: 0;
     }
   }
 
-  /* The ink trail drawn behind the pen */
+  /* The ink trail drawn behind the pen tip (bottom-left of SVG = ~1.5px from left) */
   .ink-trail {
     position: absolute;
-    left: 9px;
-    top: 50%;
+    left: 1.5px;
+    bottom: 0;
     height: 1.5px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
     border-radius: var(--radius-full);
@@ -820,11 +828,11 @@
       opacity: 0.6;
     }
     70% {
-      width: calc(100% - 18px);
+      width: calc(100% - 2px);
       opacity: 0.6;
     }
     85% {
-      width: calc(100% - 18px);
+      width: calc(100% - 2px);
       opacity: 0;
     }
     100% {
@@ -868,7 +876,7 @@
     .ink-ring-1,
     .ink-ring-2,
     .ink-dot,
-    .pen-nib,
+    .pen-nib-wrapper,
     .ink-trail {
       animation: none;
     }
