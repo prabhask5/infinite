@@ -236,7 +236,7 @@
 
       <!-- ── Rich Text Editor ── -->
       <NoteEditor
-        content={data.content}
+        ydoc={data.ydoc}
         meta={data.meta}
         noteId={data.note.id}
         {isLocked}

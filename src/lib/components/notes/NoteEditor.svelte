@@ -33,15 +33,15 @@
   import SlashCommandMenu from './SlashCommandMenu.svelte';
   import EditorToolbar from './EditorToolbar.svelte';
   import { debug } from 'stellar-drive/utils';
-  import type { XmlFragment as YXmlFragment, Map as YMap } from 'yjs';
+  import type { YDoc, YMap } from 'stellar-drive/crdt';
 
   // ===========================================================================
   //  Props
   // ===========================================================================
 
   interface Props {
-    /** Yjs XML fragment backing the editor content. */
-    content: YXmlFragment;
+    /** The Y.js document backing collaborative editing. */
+    ydoc: YDoc;
     /** Yjs map holding note metadata (title, icon, etc.). */
     meta: YMap<unknown>;
     /** Whether the note is locked (read-only). */
@@ -52,7 +52,7 @@
     onContentChange?: () => void;
   }
 
-  let { content, meta: _meta, isLocked, noteId, onContentChange }: Props = $props();
+  let { ydoc, meta: _meta, isLocked, noteId, onContentChange }: Props = $props();
 
   // ===========================================================================
   //  State
@@ -175,7 +175,8 @@
           codeBlock: false
         }),
         Collaboration.configure({
-          fragment: content
+          document: ydoc,
+          field: 'content'
         }),
         Placeholder.configure({
           placeholder: "Type '/' for commands..."

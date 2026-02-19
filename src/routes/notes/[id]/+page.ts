@@ -13,13 +13,12 @@ import { debug } from 'stellar-drive/utils';
 import { getBreadcrumbs } from '$lib/stores/notes';
 import type { PageLoad } from './$types';
 import type { Note } from '$lib/types';
-import type { CRDTProvider } from 'stellar-drive/crdt';
-import type { XmlFragment as YXmlFragment, Map as YMap } from 'yjs';
+import type { CRDTProvider, YDoc, YMap } from 'stellar-drive/crdt';
 
 export interface NotePageData {
   note: Note;
   provider: CRDTProvider;
-  content: YXmlFragment;
+  ydoc: YDoc;
   meta: YMap<unknown>;
   breadcrumbs: Note[];
 }
@@ -48,9 +47,9 @@ export const load: PageLoad = async ({ params }): Promise<NotePageData> => {
   debug('log', '[NoteEditor] Opening CRDT document:', documentId);
   const provider = await openDocument(documentId, noteId, { offlineEnabled: true });
 
-  // Create block document structure (content + meta)
-  const { content, meta } = createBlockDocument(provider.doc);
-  debug('log', '[NoteEditor] CRDT document opened, content fragment ready');
+  // Create block document structure (ensures content + meta shared types exist)
+  const { meta } = createBlockDocument(provider.doc);
+  debug('log', '[NoteEditor] CRDT document opened, Y.Doc ready');
 
-  return { note, provider, content, meta, breadcrumbs };
+  return { note, provider, ydoc: provider.doc, meta, breadcrumbs };
 };

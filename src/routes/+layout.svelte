@@ -469,20 +469,22 @@
           <span class="sidebar-greeting">Hey, {firstName}!</span>
         </a>
         <button class="sidebar-signout" onclick={handleSignOut} aria-label="Sign out">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
+          <span class="sidebar-signout-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </span>
           <span class="sidebar-signout-label">Sign out</span>
         </button>
       </div>
@@ -1076,14 +1078,13 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 0 12px;
   }
 
   .sidebar-nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 8px;
+    padding: 10px 20px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--color-text-secondary);
@@ -1107,8 +1108,8 @@
   }
 
   .sidebar-nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -1134,14 +1135,14 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 0 12px 8px;
+    padding: 0 0 8px;
   }
 
   .sidebar-profile {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 8px;
+    padding: 10px 20px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--color-text-secondary);
@@ -1158,15 +1159,15 @@
   }
 
   .sidebar-avatar {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: var(--gradient-primary);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     flex-shrink: 0;
   }
@@ -1184,7 +1185,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 8px;
+    padding: 10px 20px;
     border-radius: var(--radius-sm);
     border: none;
     background: none;
@@ -1201,8 +1202,13 @@
     text-align: left;
   }
 
-  .sidebar-signout svg {
+  .sidebar-signout-icon {
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .sidebar-signout:hover {
