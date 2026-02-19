@@ -229,7 +229,7 @@
   <div class="setup-container">
     <!-- ═══ Header ═══ -->
     <h1 class="setup-title">Set Up Infinite Notes</h1>
-    <p class="setup-subtitle">Connect your own Supabase backend in four quick steps.</p>
+    <p class="setup-subtitle">Configure Infinite Notes to connect to your own Supabase backend</p>
 
     <!-- ═══ Step Indicator ═══ -->
     <div class="step-indicator">
@@ -385,157 +385,148 @@
       {:else}
         <h2>Deploy to Vercel</h2>
 
-        {#if isFirstSetup}
-          <p>
-            To persist your Supabase credentials across deployments, Infinite Notes needs a one-time
-            Vercel API token to set environment variables and trigger a redeploy.
-          </p>
+        <p>
+          To persist your Supabase credentials across deployments, Infinite Notes needs a one-time
+          Vercel API token to set environment variables and trigger a redeploy.
+        </p>
 
-          <ol class="instruction-list">
-            <li>
-              Go to
-              <a href="https://vercel.com/account/tokens" target="_blank" rel="noopener noreferrer">
-                Vercel Settings &gt; Tokens
-              </a>
-            </li>
-            <li>Create a token with a descriptive name (e.g., "Infinite Notes Setup")</li>
-            <li>Copy the token and paste it below</li>
-          </ol>
+        <ol class="instruction-list">
+          <li>
+            Go to
+            <a href="https://vercel.com/account/tokens" target="_blank" rel="noopener noreferrer">
+              Vercel Settings &gt; Tokens
+            </a>
+          </li>
+          <li>Create a token with a descriptive name (e.g., "Infinite Notes Setup")</li>
+          <li>Copy the token and paste it below</li>
+        </ol>
 
-          <div class="info-note">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              ><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line
-                x1="12"
-                y1="8"
-                x2="12.01"
-                y2="8"
-              /></svg
+        <div class="info-note">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line
+              x1="12"
+              y1="8"
+              x2="12.01"
+              y2="8"
+            /></svg
+          >
+          <span
+            >This token is used once to set environment variables and trigger a redeployment. It is
+            not stored.</span
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="vercelToken">Vercel API Token</label>
+          <input
+            type="password"
+            id="vercelToken"
+            bind:value={vercelToken}
+            placeholder="Enter your Vercel token"
+            disabled={deploying || deployStage === 'ready'}
+          />
+        </div>
+
+        <!-- Deploy error -->
+        {#if deployError}
+          <div class="message error">{deployError}</div>
+        {/if}
+
+        <!-- Deploy button -->
+        {#if deployStage === 'idle'}
+          <button
+            class="btn btn-primary"
+            onclick={handleDeploy}
+            disabled={!validateSuccess || credentialsChanged || !vercelToken || deploying}
+          >
+            Deploy
+          </button>
+        {/if}
+
+        <!-- Deployment progress stages -->
+        {#if deployStage !== 'idle'}
+          <div class="deploy-stages">
+            <div
+              class="deploy-stage"
+              class:active={deployStage === 'setting-env'}
+              class:complete={deployStage === 'deploying' || deployStage === 'ready'}
             >
-            <span
-              >This token is used once to set environment variables and trigger a redeployment. It
-              is not stored.</span
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="vercelToken">Vercel API Token</label>
-            <input
-              type="password"
-              id="vercelToken"
-              bind:value={vercelToken}
-              placeholder="Enter your Vercel token"
-              disabled={deploying || deployStage === 'ready'}
-            />
-          </div>
-
-          <!-- Deploy error -->
-          {#if deployError}
-            <div class="message error">{deployError}</div>
-          {/if}
-
-          <!-- Deploy button -->
-          {#if deployStage === 'idle'}
-            <button
-              class="btn btn-primary"
-              onclick={handleDeploy}
-              disabled={!validateSuccess || credentialsChanged || !vercelToken || deploying}
-            >
-              Deploy
-            </button>
-          {/if}
-
-          <!-- Deployment progress stages -->
-          {#if deployStage !== 'idle'}
-            <div class="deploy-stages">
-              <div
-                class="deploy-stage"
-                class:active={deployStage === 'setting-env'}
-                class:complete={deployStage === 'deploying' || deployStage === 'ready'}
-              >
-                {#if deployStage === 'setting-env'}
-                  <span class="loading-spinner small"></span>
-                {:else}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
-                  >
-                {/if}
-                <span>Setting environment variables...</span>
-              </div>
-
-              <div
-                class="deploy-stage"
-                class:active={deployStage === 'deploying'}
-                class:complete={deployStage === 'ready'}
-              >
-                {#if deployStage === 'deploying'}
-                  <span class="loading-spinner small"></span>
-                {:else if deployStage === 'ready'}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
-                  >
-                {:else}
-                  <span class="stage-dot"></span>
-                {/if}
-                <span>Deploying... (this may take a minute)</span>
-              </div>
-
-              <div class="deploy-stage" class:active={deployStage === 'ready'}>
-                {#if deployStage === 'ready'}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
-                  >
-                {:else}
-                  <span class="stage-dot"></span>
-                {/if}
-                <span>Ready</span>
-              </div>
+              {#if deployStage === 'setting-env'}
+                <span class="loading-spinner small"></span>
+              {:else}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
+                >
+              {/if}
+              <span>Setting environment variables...</span>
             </div>
 
-            {#if deployStage === 'ready'}
-              <div class="message success">
-                Your Infinite Notes instance is configured and the new deployment is live.
-              </div>
-              <button class="btn btn-primary" onclick={() => location.reload()}>
-                Refresh to Complete Setup
-              </button>
-            {/if}
+            <div
+              class="deploy-stage"
+              class:active={deployStage === 'deploying'}
+              class:complete={deployStage === 'ready'}
+            >
+              {#if deployStage === 'deploying'}
+                <span class="loading-spinner small"></span>
+              {:else if deployStage === 'ready'}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
+                >
+              {:else}
+                <span class="stage-dot"></span>
+              {/if}
+              <span>Deploying... (this may take a minute)</span>
+            </div>
+
+            <div class="deploy-stage" class:active={deployStage === 'ready'}>
+              {#if deployStage === 'ready'}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
+                >
+              {:else}
+                <span class="stage-dot"></span>
+              {/if}
+              <span>Ready</span>
+            </div>
+          </div>
+
+          {#if deployStage === 'ready'}
+            <div class="message success">
+              Your Infinite Notes instance is configured and the new deployment is live.
+            </div>
+            <button class="btn btn-primary" onclick={() => location.reload()}>
+              Refresh to Complete Setup
+            </button>
           {/if}
-        {:else}
-          <!-- Reconfiguration mode (not first setup) -->
-          <p>Your Supabase credentials have been saved locally.</p>
-          <div class="message success">Configuration saved successfully.</div>
-          <a href="/" class="btn btn-primary" style="text-decoration: none; text-align: center;"
-            >Done</a
-          >
         {/if}
       {/if}
     </div>
