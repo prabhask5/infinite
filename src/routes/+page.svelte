@@ -196,10 +196,11 @@
       debug('log', `[Home] Loaded ${notes.length} recent notes`);
     });
 
-    /* Subscribe to sync-completion events to detect overnight period changes */
-    unsubscribeSyncComplete = onSyncComplete(() => {
-      debug('log', '[Home] Sync complete, checking greeting period');
+    /* Subscribe to sync-completion events to refresh data and greeting */
+    unsubscribeSyncComplete = onSyncComplete(async () => {
+      debug('log', '[Home] Sync complete, refreshing');
       updateGreetingIfNeeded();
+      recentNotes = await getRecentNotes(5);
     });
   });
 

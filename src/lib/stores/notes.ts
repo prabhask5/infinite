@@ -226,13 +226,18 @@ export async function getChildNotes(parentId: string): Promise<Note[]> {
  */
 export async function getBreadcrumbs(noteId: string): Promise<Note[]> {
   debug('log', '[Notes] Building breadcrumbs for:', noteId);
+
+  // Load all notes once and walk the tree in memory (avoids N+1 queries)
+  const all = await queryAll<Note>(TABLE);
+  const byId = new Map(all.map((n) => [n.id, n]));
+
   const crumbs: Note[] = [];
   let currentId: string | null = noteId;
 
   // Walk up the parent chain (max 20 levels to prevent infinite loops)
   let depth = 0;
   while (currentId && depth < 20) {
-    const found: Note | null = await queryOne<Note>(TABLE, currentId);
+    const found = byId.get(currentId);
     if (!found) break;
     crumbs.unshift(found);
     currentId = found.parent_note_id;

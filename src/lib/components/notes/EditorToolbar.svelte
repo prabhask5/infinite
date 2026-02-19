@@ -67,18 +67,21 @@
       }
     };
 
-    editor.on('selectionUpdate', updatePosition);
-    editor.on('blur', () => {
+    const handleBlur = () => {
       // Small delay to allow button clicks to register
       setTimeout(() => {
         if (!editor.isFocused) {
           isVisible = false;
         }
       }, 150);
-    });
+    };
+
+    editor.on('selectionUpdate', updatePosition);
+    editor.on('blur', handleBlur);
 
     return () => {
       editor.off('selectionUpdate', updatePosition);
+      editor.off('blur', handleBlur);
     };
   });
 

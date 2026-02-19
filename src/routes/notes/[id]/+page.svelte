@@ -32,6 +32,7 @@
   /* ── Stellar Drive — CRDT & Utilities ── */
   import { closeDocument } from 'stellar-drive/crdt';
   import { debug } from 'stellar-drive/utils';
+  import SyncStatus from 'stellar-drive/components/SyncStatus';
 
   /* ── App Stores ── */
   import {
@@ -86,41 +87,29 @@
     breadcrumbs = data.breadcrumbs ?? [];
   });
 
-  /** Timer handle for debounced title updates. */
-  let titleDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-
   // ==========================================================================
   //                           TITLE SYNC
   // ==========================================================================
 
   /**
    * Handles title changes from the NoteTitle component.
-   * Debounces the update to avoid excessive writes, then syncs
-   * to both the CRDT meta Y.Map and the note metadata store.
+   * NoteTitle already debounces at 500ms, so we sync immediately here.
    *
    * @param newTitle - The updated title string
    */
   function handleTitleChange(newTitle: string): void {
     title = newTitle;
+    debug('log', '[NoteEditor] Syncing title:', newTitle);
 
-    /* Clear any pending debounce */
-    if (titleDebounceTimer) {
-      clearTimeout(titleDebounceTimer);
+    /* Update CRDT meta map for collaborative sync */
+    if (data.meta) {
+      data.meta.set('title', newTitle);
     }
 
-    titleDebounceTimer = setTimeout(() => {
-      debug('log', '[NoteEditor] Syncing title:', newTitle);
-
-      /* Update CRDT meta map for collaborative sync */
-      if (data.meta) {
-        data.meta.set('title', newTitle);
-      }
-
-      /* Persist to the note metadata store */
-      if (data.note) {
-        updateNoteMeta(data.note.id, { title: newTitle });
-      }
-    }, 400);
+    /* Persist to the note metadata store */
+    if (data.note) {
+      updateNoteMeta(data.note.id, { title: newTitle });
+    }
   }
 
   // ==========================================================================
@@ -183,17 +172,12 @@
   // ==========================================================================
 
   onDestroy(() => {
-    /* Clean up the debounce timer */
-    if (titleDebounceTimer) {
-      clearTimeout(titleDebounceTimer);
-      titleDebounceTimer = null;
-    }
-
-    /* Close the CRDT document to release resources */
+    /* Close the CRDT document to release resources (fire-and-forget is safe —
+       closeDocument persists dirty state internally before destroying) */
     if (data.note) {
       const documentId = `note-content-${data.note.id}`;
       debug('log', '[NoteEditor] Closing CRDT document:', documentId);
-      closeDocument(documentId);
+      void closeDocument(documentId);
     }
   });
 </script>
@@ -217,6 +201,11 @@
       onToggleLock={handleToggleLock}
       onMove={() => (showMoveModal = true)}
     />
+
+    <!-- ── Sync Status ── -->
+    <div class="sync-status-row">
+      <SyncStatus />
+    </div>
 
     <!-- ── Editor Content Area ── -->
     <div class="note-content">
@@ -268,17 +257,26 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    padding: 0 1.5rem;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
-     NOTE CONTENT — centred editing area
+     SYNC STATUS ROW
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .sync-status-row {
+    padding: 0.5rem 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     NOTE CONTENT — centred editing area, fills remaining height
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .note-content {
     max-width: 720px;
     width: 100%;
     margin: 0 auto;
-    padding: 1.5rem 1.5rem 3rem;
+    padding: 0 0 3rem;
     flex: 1;
   }
 
@@ -287,14 +285,14 @@
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   @media (max-width: 768px) {
-    .note-content {
-      padding: 1rem 1rem 2.5rem;
+    .note-page {
+      padding: 0 1rem;
     }
   }
 
   @media (max-width: 480px) {
-    .note-content {
-      padding: 0.75rem 0.75rem 2rem;
+    .note-page {
+      padding: 0 0.75rem;
     }
   }
 </style>

@@ -25,7 +25,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [
     sveltekit(),
-    stellarPWA({ prefix: 'infinite', name: 'Infinite Notes', schema: true })
+    stellarPWA({ prefix: 'infinite', name: 'Infinite Notes', schema: { includeCRDT: true } })
   ],
   build: {
     rollupOptions: {

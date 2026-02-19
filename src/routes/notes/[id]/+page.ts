@@ -32,20 +32,20 @@ export const load: PageLoad = async ({ params }): Promise<NotePageData> => {
   const noteId = params.id;
   debug('log', '[NoteEditor] Loading note:', noteId);
 
-  // Load note metadata
-  const note = await queryOne<Note>('notes', noteId);
+  // Load note metadata, breadcrumbs, and CRDT document in parallel
+  const documentId = `note-content-${noteId}`;
+  debug('log', '[NoteEditor] Opening CRDT document:', documentId);
+
+  const [note, breadcrumbs, provider] = await Promise.all([
+    queryOne<Note>('notes', noteId),
+    getBreadcrumbs(noteId),
+    openDocument(documentId, noteId, { offlineEnabled: true })
+  ]);
+
   if (!note) {
     debug('error', '[NoteEditor] Note not found:', noteId);
     error(404, 'Note not found');
   }
-
-  // Load breadcrumbs
-  const breadcrumbs = await getBreadcrumbs(noteId);
-
-  // Open CRDT document for collaborative editing
-  const documentId = `note-content-${noteId}`;
-  debug('log', '[NoteEditor] Opening CRDT document:', documentId);
-  const provider = await openDocument(documentId, noteId, { offlineEnabled: true });
 
   // Create block document structure (ensures content + meta shared types exist)
   const { meta } = createBlockDocument(provider.doc);

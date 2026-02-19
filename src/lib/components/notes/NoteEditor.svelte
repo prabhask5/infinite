@@ -19,7 +19,7 @@
   // ===========================================================================
 
   import { onMount, onDestroy, tick } from 'svelte';
-  import { Editor } from '@tiptap/core';
+  import { Editor, Extension } from '@tiptap/core';
   import StarterKit from '@tiptap/starter-kit';
   import Collaboration from '@tiptap/extension-collaboration';
   import Placeholder from '@tiptap/extension-placeholder';
@@ -91,8 +91,13 @@
    * into Svelte 5 reactive state. These callbacks open, update, and close the
    * floating `<SlashCommandMenu>`.
    */
-  function buildSuggestionCallbacks() {
-    return {
+  /**
+   * Build the suggestion `render` function for Tiptap v3.
+   * In v3, lifecycle callbacks must be returned from `render()`,
+   * not passed as top-level suggestion options.
+   */
+  function buildSuggestionRender() {
+    return () => ({
       onStart: (props: {
         items: SlashCommandItem[];
         command: (item: SlashCommandItem) => void;
@@ -154,7 +159,7 @@
         slashMenuCommand = null;
         slashMenuClientRect = null;
       }
-    };
+    });
   }
 
   // ===========================================================================
@@ -195,7 +200,33 @@
         }),
         SlashCommands.configure({
           suggestion: {
-            ...buildSuggestionCallbacks()
+            render: buildSuggestionRender()
+          }
+        }),
+        // Tab/Shift+Tab indent/outdent for lists and task lists
+        Extension.create({
+          name: 'listIndent',
+          addKeyboardShortcuts() {
+            return {
+              Tab: () => {
+                if (this.editor.isActive('listItem')) {
+                  return this.editor.commands.sinkListItem('listItem');
+                }
+                if (this.editor.isActive('taskItem')) {
+                  return this.editor.commands.sinkListItem('taskItem');
+                }
+                return false;
+              },
+              'Shift-Tab': () => {
+                if (this.editor.isActive('listItem')) {
+                  return this.editor.commands.liftListItem('listItem');
+                }
+                if (this.editor.isActive('taskItem')) {
+                  return this.editor.commands.liftListItem('taskItem');
+                }
+                return false;
+              }
+            };
           }
         })
       ],
@@ -216,7 +247,14 @@
 
   onDestroy(() => {
     debug('log', `[NoteEditor:${noteId}] Destroying editor`);
-    if (debounceTimer) clearTimeout(debounceTimer);
+
+    /* Flush any pending content change before destroy */
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+      onContentChange?.();
+    }
+
     editor?.destroy();
     editor = null;
   });
@@ -288,7 +326,8 @@
 
   .editor-container {
     width: 100%;
-    min-height: 200px;
+    min-height: calc(100vh - 200px);
+    min-height: calc(100dvh - 200px);
   }
 
   /* --------------------------------------------------------------------------
