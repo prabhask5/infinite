@@ -234,14 +234,16 @@
         }}
       />
 
-      <!-- ── Rich Text Editor ── -->
-      <NoteEditor
-        ydoc={data.ydoc}
-        meta={data.meta}
-        noteId={data.note.id}
-        {isLocked}
-        onContentChange={handleContentChange}
-      />
+      <!-- ── Rich Text Editor — keyed to force recreation on note change ── -->
+      {#key data.note.id}
+        <NoteEditor
+          ydoc={data.ydoc}
+          meta={data.meta}
+          noteId={data.note.id}
+          {isLocked}
+          onContentChange={handleContentChange}
+        />
+      {/key}
     </div>
 
     <!-- ── Move Note Modal ── -->

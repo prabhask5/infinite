@@ -18,7 +18,7 @@
   //  Imports
   // ===========================================================================
 
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { Editor } from '@tiptap/core';
   import StarterKit from '@tiptap/starter-kit';
   import Collaboration from '@tiptap/extension-collaboration';
@@ -161,8 +161,11 @@
   //  Lifecycle
   // ===========================================================================
 
-  onMount(() => {
+  onMount(async () => {
     if (!editorContainer) return;
+
+    // Wait for the DOM to settle and Y.Doc state to be fully loaded
+    await tick();
 
     debug('log', `[NoteEditor:${noteId}] Creating editor instance`);
 
