@@ -1031,6 +1031,7 @@
   .sidebar-nav-item {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1043,6 +1044,10 @@
       background var(--duration-fast) ease,
       color var(--duration-fast) ease;
     min-height: 44px;
+  }
+
+  .sidebar:hover .sidebar-nav-item {
+    justify-content: flex-start;
   }
 
   .sidebar-nav-item:hover {
@@ -1062,11 +1067,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 10px;
-  }
-
-  .sidebar:hover .sidebar-nav-icon {
-    margin-left: 0;
   }
 
   .sidebar-nav-label {
@@ -1100,7 +1100,6 @@
 
   .sidebar:hover .sidebar-sync {
     justify-content: flex-start;
-    padding-left: 8px;
   }
 
   /* Override SyncStatus tooltip position inside the narrow sidebar rail */
@@ -1117,6 +1116,7 @@
   .sidebar-profile {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1127,6 +1127,10 @@
     white-space: nowrap;
     transition: background var(--duration-fast) ease;
     min-height: 44px;
+  }
+
+  .sidebar:hover .sidebar-profile {
+    justify-content: flex-start;
   }
 
   .sidebar-profile:hover {
@@ -1146,11 +1150,6 @@
     font-size: 0.75rem;
     font-weight: 700;
     flex-shrink: 0;
-    margin-left: 6px;
-  }
-
-  .sidebar:hover .sidebar-avatar {
-    margin-left: 0;
   }
 
   .sidebar-greeting {
@@ -1165,6 +1164,7 @@
   .sidebar-signout {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     padding: 10px 8px;
     border-radius: var(--radius-sm);
@@ -1183,13 +1183,12 @@
     text-align: left;
   }
 
-  .sidebar-signout svg {
-    flex-shrink: 0;
-    margin-left: 11px;
+  .sidebar:hover .sidebar-signout {
+    justify-content: flex-start;
   }
 
-  .sidebar:hover .sidebar-signout svg {
-    margin-left: 0;
+  .sidebar-signout svg {
+    flex-shrink: 0;
   }
 
   .sidebar-signout:hover {

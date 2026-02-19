@@ -815,33 +815,28 @@
   <title>Profile - Infinite Notes</title>
 </svelte:head>
 
-<!-- ═══ Notebook Page ═══ -->
-<div class="notebook-page">
-  <div class="notebook-content">
-    <!-- ═══ Profile Header ═══ -->
-    <header class="profile-header section-enter" style="animation-delay: 0ms">
-      <div class="avatar-ring">
-        <div class="avatar">
-          {resolveAvatarInitial($authState?.session, $authState?.offlineProfile)}
-        </div>
+<div class="profile-page">
+  <!-- Header (no card) -->
+  <header class="profile-hero section-reveal" style="animation-delay: 0ms">
+    <div class="avatar-ring">
+      <div class="avatar-disc">
+        {resolveAvatarInitial($authState?.session, $authState?.offlineProfile)}
       </div>
-      <h1 class="profile-name">{firstName} {lastName}</h1>
-      <p class="profile-email">{currentEmail || 'No email set'}</p>
-    </header>
-
-    <!-- ═══ Section: Edit Profile ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 60ms">
-      <span class="section-label">Profile</span>
-      <span class="ruling-line"></span>
     </div>
+    <h1 class="profile-name">{firstName} {lastName}</h1>
+    <p class="profile-email">{currentEmail || 'No email set'}</p>
+  </header>
 
-    <section class="notebook-section section-enter" style="animation-delay: 60ms">
+  <!-- Section: Profile -->
+  <div class="section-reveal" style="animation-delay: 50ms">
+    <p class="section-label">Profile</p>
+    <div class="card">
       <form onsubmit={handleProfileSubmit}>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First name</label>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="firstName">First name</label>
             <input
-              class="ruled-input"
+              class="field-input"
               type="text"
               id="firstName"
               bind:value={firstName}
@@ -849,10 +844,10 @@
               placeholder="First name"
             />
           </div>
-          <div class="form-group">
-            <label for="lastName">Last name</label>
+          <div class="field">
+            <label class="field-label" for="lastName">Last name</label>
             <input
-              class="ruled-input"
+              class="field-input"
               type="text"
               id="lastName"
               bind:value={lastName}
@@ -863,35 +858,33 @@
         </div>
 
         {#if profileError}
-          <p class="error-message">{profileError}</p>
+          <p class="msg-error">{profileError}</p>
         {/if}
 
         {#if profileSuccess}
-          <p class="success-message">{profileSuccess}</p>
+          <p class="msg-success">{profileSuccess}</p>
         {/if}
 
         <button type="submit" class="btn btn-primary" disabled={profileLoading}>
           {profileLoading ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
-    </section>
-
-    <!-- ═══ Section: Change Email ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 120ms">
-      <span class="section-label">Email</span>
-      <span class="ruling-line"></span>
     </div>
+  </div>
 
-    <section class="notebook-section section-enter" style="animation-delay: 120ms">
+  <!-- Section: Email -->
+  <div class="section-reveal" style="animation-delay: 100ms">
+    <p class="section-label">Email</p>
+    <div class="card">
       {#if currentEmail}
-        <p class="current-value">Current: <span class="current-value-text">{currentEmail}</span></p>
+        <p class="current-email">Current: <span class="current-email-addr">{currentEmail}</span></p>
       {/if}
 
       <form onsubmit={handleEmailSubmit}>
-        <div class="form-group">
-          <label for="newEmail">New email address</label>
+        <div class="field">
+          <label class="field-label" for="newEmail">New email address</label>
           <input
-            class="ruled-input"
+            class="field-input"
             type="email"
             id="newEmail"
             bind:value={newEmail}
@@ -901,79 +894,75 @@
         </div>
 
         {#if emailError}
-          <p class="error-message">{emailError}</p>
+          <p class="msg-error">{emailError}</p>
         {/if}
 
         {#if emailSuccess}
-          <p class="success-message">{emailSuccess}</p>
+          <p class="msg-success">{emailSuccess}</p>
         {/if}
 
         <button type="submit" class="btn btn-primary" disabled={emailLoading || !newEmail}>
           {emailLoading ? 'Sending...' : 'Update Email'}
         </button>
       </form>
-    </section>
-
-    <!-- ═══ Email Confirmation Modal ═══ -->
-    {#if showEmailConfirmationModal}
-      <div class="modal-overlay" role="dialog" aria-modal="true">
-        <div class="modal-card">
-          <div class="modal-icon">
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-              />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-          </div>
-          <h2 class="modal-title">Check your email</h2>
-          <p class="modal-text">
-            We sent a confirmation link to <strong>{newEmail}</strong>. Click the link to confirm
-            your new email address.
-          </p>
-
-          <button
-            class="btn btn-secondary modal-resend"
-            disabled={emailResendCooldown > 0}
-            onclick={handleResendEmailChange}
-          >
-            {#if emailResendCooldown > 0}
-              Resend in {emailResendCooldown}s
-            {:else}
-              Resend confirmation email
-            {/if}
-          </button>
-
-          <button class="btn btn-ghost modal-dismiss" onclick={dismissEmailModal}>Cancel</button>
-        </div>
-      </div>
-    {/if}
-
-    <!-- ═══ Section: Change Gate Code ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 180ms">
-      <span class="section-label">Gate Code</span>
-      <span class="ruling-line"></span>
     </div>
+  </div>
 
-    <section class="notebook-section section-enter" style="animation-delay: 180ms">
-      <p class="section-hint">Enter your current code and choose a new one.</p>
+  <!-- Email Confirmation Modal -->
+  {#if showEmailConfirmationModal}
+    <div class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal-pane">
+        <div class="modal-icon">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+        </div>
+        <h2 class="modal-heading">Check your email</h2>
+        <p class="modal-body">
+          We sent a confirmation link to <strong>{newEmail}</strong>. Click the link to confirm your
+          new email address.
+        </p>
+
+        <button
+          class="btn btn-secondary modal-primary"
+          disabled={emailResendCooldown > 0}
+          onclick={handleResendEmailChange}
+        >
+          {#if emailResendCooldown > 0}
+            Resend in {emailResendCooldown}s
+          {:else}
+            Resend confirmation email
+          {/if}
+        </button>
+
+        <button class="btn btn-ghost modal-dismiss" onclick={dismissEmailModal}>Cancel</button>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Section: Gate Code -->
+  <div class="section-reveal" style="animation-delay: 150ms">
+    <p class="section-label">Gate Code</p>
+    <div class="card">
+      <p class="hint">Enter your current code and choose a new one.</p>
 
       <form onsubmit={handleCodeSubmit}>
-        <div class="form-group">
-          <label for="oldCode0">Current gate code</label>
+        <div class="field">
+          <label class="field-label" for="oldCode0">Current gate code</label>
           <div class="digit-row">
             {#each oldCodeDigits as digit, i (i)}
               <input
-                class="digit-input"
+                class="digit-box"
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]"
@@ -991,12 +980,12 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="newCode0">New gate code</label>
+        <div class="field">
+          <label class="field-label" for="newCode0">New gate code</label>
           <div class="digit-row">
             {#each newCodeDigits as digit, i (i)}
               <input
-                class="digit-input"
+                class="digit-box"
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]"
@@ -1014,12 +1003,12 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="confirmCode0">Confirm new gate code</label>
+        <div class="field">
+          <label class="field-label" for="confirmCode0">Confirm new gate code</label>
           <div class="digit-row">
             {#each confirmCodeDigits as digit, i (i)}
               <input
-                class="digit-input"
+                class="digit-box"
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]"
@@ -1038,178 +1027,159 @@
         </div>
 
         {#if codeError}
-          <p class="error-message">{codeError}</p>
+          <p class="msg-error">{codeError}</p>
         {/if}
 
         {#if codeSuccess}
-          <p class="success-message">{codeSuccess}</p>
+          <p class="msg-success">{codeSuccess}</p>
         {/if}
 
         <button type="submit" class="btn btn-primary" disabled={codeLoading}>
           {codeLoading ? 'Updating...' : 'Update Gate Code'}
         </button>
       </form>
-    </section>
-
-    <!-- ═══ Section: Trusted Devices ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 240ms">
-      <span class="section-label">Trusted Devices</span>
-      <span class="ruling-line"></span>
     </div>
+  </div>
 
-    <section class="notebook-section section-enter" style="animation-delay: 240ms">
+  <!-- Section: Trusted Devices -->
+  <div class="section-reveal" style="animation-delay: 200ms">
+    <p class="section-label">Trusted Devices</p>
+    <div class="card">
       {#if devicesLoading}
-        <p class="section-hint">Loading devices...</p>
+        <p class="hint">Loading devices...</p>
       {:else if trustedDevices.length === 0}
-        <p class="empty-state">No trusted devices registered.</p>
+        <p class="empty-msg">No trusted devices registered.</p>
       {:else}
-        <div class="device-list">
-          {#each trustedDevices as device, idx (device.id)}
-            <div
-              class="device-card"
-              class:device-card-current={device.deviceId === currentDeviceId}
-              style="transform: rotate({idx % 2 === 0 ? -0.6 : 0.4}deg)"
-            >
-              <div class="device-info">
-                <span class="device-name">
-                  {device.deviceLabel || 'Unknown Device'}
-                </span>
-                {#if device.deviceId === currentDeviceId}
-                  <span class="device-stamp">This Device</span>
-                {/if}
-                <span class="device-date"
-                  >Last used {new Date(device.lastUsedAt).toLocaleDateString()}</span
-                >
-              </div>
-              {#if device.deviceId !== currentDeviceId}
-                <button
-                  class="btn btn-danger btn-sm"
-                  onclick={() => handleRemoveDevice(device.id)}
-                  disabled={removingDeviceId === device.id}
-                >
-                  {removingDeviceId === device.id ? 'Removing...' : 'Remove'}
-                </button>
+        {#each trustedDevices as device (device.id)}
+          <div class="device-row" class:device-row--current={device.deviceId === currentDeviceId}>
+            <div class="device-meta">
+              <span class="device-label">
+                {device.deviceLabel || 'Unknown Device'}
+              </span>
+              {#if device.deviceId === currentDeviceId}
+                <span class="device-badge">This Device</span>
               {/if}
+              <span class="device-date"
+                >Last used {new Date(device.lastUsedAt).toLocaleDateString()}</span
+              >
             </div>
-          {/each}
-        </div>
+            {#if device.deviceId !== currentDeviceId}
+              <button
+                class="btn btn-danger btn-sm"
+                onclick={() => handleRemoveDevice(device.id)}
+                disabled={removingDeviceId === device.id}
+              >
+                {removingDeviceId === device.id ? 'Removing...' : 'Remove'}
+              </button>
+            {/if}
+          </div>
+        {/each}
       {/if}
-    </section>
-
-    <!-- ═══ Section: Settings ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 300ms">
-      <span class="section-label">Settings</span>
-      <span class="ruling-line"></span>
     </div>
+  </div>
 
-    <section class="notebook-section section-enter" style="animation-delay: 300ms">
-      <div class="setting-row">
+  <!-- Section: Settings -->
+  <div class="section-reveal" style="animation-delay: 250ms">
+    <p class="section-label">Settings</p>
+    <div class="card">
+      <div class="setting-item">
         <div>
           <strong>Debug Mode</strong>
-          <p class="section-hint">Show debug tools below (refresh needed for full effect)</p>
+          <p class="hint">Show debug tools below (refresh needed for full effect)</p>
         </div>
         <button
-          class="toggle-btn"
-          class:active={debugMode}
+          class="toggle"
+          class:on={debugMode}
           onclick={toggleDebugMode}
           role="switch"
           aria-checked={debugMode}
           aria-label="Toggle debug mode"
         >
-          <span class="toggle-knob"></span>
+          <span class="toggle-pip"></span>
         </button>
       </div>
 
-      <div class="setting-row">
+      <div class="setting-item">
         <div>
           <strong>Sign Out</strong>
-          <p class="section-hint">Lock your notes and return to login.</p>
+          <p class="hint">Lock your notes and return to login.</p>
         </div>
         <button class="btn btn-secondary btn-sm" onclick={handleMobileSignOut}>Sign Out</button>
       </div>
-    </section>
-
-    <!-- ═══ Danger Zone ═══ -->
-    <div class="ruling-divider ruling-divider-danger section-enter" style="animation-delay: 360ms">
-      <span class="section-label section-label-danger">Danger Zone</span>
-      <span class="ruling-line ruling-line-danger"></span>
     </div>
+  </div>
 
-    <section class="notebook-section danger-section section-enter" style="animation-delay: 360ms">
-      <div class="setting-row danger">
+  <!-- Section: Danger Zone -->
+  <div class="section-reveal" style="animation-delay: 300ms">
+    <p class="section-label section-label--danger">Danger Zone</p>
+    <div class="card card--danger">
+      <div class="setting-item danger">
         <div>
           <strong>Reset Database</strong>
-          <p class="section-hint">Delete all local data. This cannot be undone.</p>
+          <p class="hint">Delete all local data. This cannot be undone.</p>
         </div>
         <button class="btn btn-danger btn-sm" onclick={handleResetDatabase} disabled={resetting}>
           {resetting ? 'Resetting...' : 'Reset'}
         </button>
       </div>
-    </section>
-
-    <!-- ═══ Diagnostics Dashboard ═══ -->
-    <div class="ruling-divider section-enter" style="animation-delay: 420ms">
-      <span class="section-label">Diagnostics</span>
-      <span class="ruling-line"></span>
     </div>
+  </div>
 
-    <section class="notebook-section diag-appendix section-enter" style="animation-delay: 420ms">
-      <p class="section-hint">Live sync engine health dashboard</p>
-
+  <!-- Section: Diagnostics -->
+  <div class="section-reveal" style="animation-delay: 350ms">
+    <p class="section-label">Diagnostics</p>
+    <div class="card diag-panel">
       {#if diagnosticsLoading}
-        <div class="devices-loading">
-          <span class="loading-spinner"></span>
-        </div>
+        <p class="hint">Loading diagnostics...</p>
       {:else if diagnostics}
         <!-- 1. Status Banner -->
-        <div class="diag-status-banner">
-          <span class="diag-status-dot diag-status-dot--{getStatusColor(diagnostics.sync.status)}"
-          ></span>
-          <div class="diag-status-info">
-            <span class="diag-status-label">{formatSyncStatus(diagnostics.sync.status)}</span>
-            <span class="diag-status-meta">
+        <div class="diag-banner">
+          <span class="diag-dot diag-dot--{getStatusColor(diagnostics.sync.status)}"></span>
+          <div>
+            <span class="diag-label">{formatSyncStatus(diagnostics.sync.status)}</span>
+            <div class="diag-sub">
               {diagnostics.network.online ? 'Online' : 'Offline'} &middot; {diagnostics.deviceId.slice(
                 0,
                 8
               )}
-            </span>
+            </div>
           </div>
         </div>
 
         <!-- 2. Sync Engine -->
-        <div class="diag-section-title">Sync Engine</div>
-        <div class="diag-grid">
+        <div class="diag-heading">Sync Engine</div>
+        <div class="diag-grid-4">
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.sync.totalCycles}</span>
-            <span class="diag-stat-label">Total Cycles</span>
+            <span class="diag-val">{diagnostics.sync.totalCycles}</span>
+            <span class="diag-key">Total Cycles</span>
           </div>
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.sync.cyclesLastMinute}</span>
-            <span class="diag-stat-label">Last Minute</span>
+            <span class="diag-val">{diagnostics.sync.cyclesLastMinute}</span>
+            <span class="diag-key">Last Minute</span>
           </div>
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.sync.pendingCount}</span>
-            <span class="diag-stat-label">Pending Ops</span>
+            <span class="diag-val">{diagnostics.sync.pendingCount}</span>
+            <span class="diag-key">Pending Ops</span>
           </div>
           <div class="diag-stat">
-            <span class="diag-stat-value">{formatTimestamp(diagnostics.sync.lastSyncTime)}</span>
-            <span class="diag-stat-label">Last Sync</span>
+            <span class="diag-val">{formatTimestamp(diagnostics.sync.lastSyncTime)}</span>
+            <span class="diag-key">Last Sync</span>
           </div>
         </div>
-        <div class="diag-badges">
-          <span class="diag-badge-{diagnostics.sync.hasHydrated ? 'ok' : 'warn'}">
+        <div class="diag-pills">
+          <span class="diag-pill diag-pill--{diagnostics.sync.hasHydrated ? 'ok' : 'warn'}">
             {diagnostics.sync.hasHydrated ? 'Hydrated' : 'Not Hydrated'}
           </span>
-          <span class="diag-badge-{diagnostics.sync.schemaValidated ? 'ok' : 'warn'}">
+          <span class="diag-pill diag-pill--{diagnostics.sync.schemaValidated ? 'ok' : 'warn'}">
             {diagnostics.sync.schemaValidated ? 'Schema OK' : 'Schema Pending'}
           </span>
         </div>
 
         <!-- 3. Realtime -->
-        <div class="diag-section-title">Realtime</div>
-        <div class="diag-row">
-          <span class="diag-row-label">Connection</span>
-          <span class="diag-row-value">
+        <div class="diag-heading">Realtime</div>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Connection</span>
+          <span class="diag-kv-value">
             <span
               class="diag-inline-dot diag-inline-dot--{diagnostics.realtime.connectionState ===
               'connected'
@@ -1221,41 +1191,41 @@
             {diagnostics.realtime.connectionState}
           </span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Healthy</span>
-          <span class="diag-row-value">{diagnostics.realtime.healthy ? 'Yes' : 'No'}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Healthy</span>
+          <span class="diag-kv-value">{diagnostics.realtime.healthy ? 'Yes' : 'No'}</span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Reconnects</span>
-          <span class="diag-row-value">{diagnostics.realtime.reconnectAttempts}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Reconnects</span>
+          <span class="diag-kv-value">{diagnostics.realtime.reconnectAttempts}</span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Events Processed</span>
-          <span class="diag-row-value">{diagnostics.realtime.recentlyProcessedCount}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Events Processed</span>
+          <span class="diag-kv-value">{diagnostics.realtime.recentlyProcessedCount}</span>
         </div>
 
         <!-- 4. Data Transfer -->
-        <div class="diag-section-title">Data Transfer</div>
+        <div class="diag-heading">Data Transfer</div>
         <div class="diag-grid-2">
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.egress.totalFormatted}</span>
-            <span class="diag-stat-label">Total Egress</span>
+            <span class="diag-val">{diagnostics.egress.totalFormatted}</span>
+            <span class="diag-key">Total Egress</span>
           </div>
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.egress.totalRecords.toLocaleString()}</span>
-            <span class="diag-stat-label">Records</span>
+            <span class="diag-val">{diagnostics.egress.totalRecords.toLocaleString()}</span>
+            <span class="diag-key">Records</span>
           </div>
         </div>
         {#if Object.keys(diagnostics.egress.byTable).length > 0}
-          <div class="diag-table-bars">
+          <div class="diag-bars">
             {#each Object.entries(diagnostics.egress.byTable) as [table, data] (table)}
-              <div class="diag-table-row">
-                <div class="diag-table-header">
-                  <span class="diag-table-name">{table}</span>
-                  <span class="diag-table-pct">{data.percentage}</span>
+              <div class="diag-bar-row">
+                <div class="diag-bar-head">
+                  <span class="diag-bar-name">{table}</span>
+                  <span class="diag-bar-pct">{data.percentage}</span>
                 </div>
-                <div class="diag-progress-bar">
-                  <div class="diag-progress-fill" style="width: {data.percentage}"></div>
+                <div class="diag-bar-track">
+                  <div class="diag-bar-fill" style="width: {data.percentage}"></div>
                 </div>
               </div>
             {/each}
@@ -1263,55 +1233,54 @@
         {/if}
 
         <!-- 5. Sync Queue -->
-        <div class="diag-section-title">Sync Queue</div>
+        <div class="diag-heading">Sync Queue</div>
         <div class="diag-grid-2">
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.queue.pendingOperations}</span>
-            <span class="diag-stat-label">Pending</span>
+            <span class="diag-val">{diagnostics.queue.pendingOperations}</span>
+            <span class="diag-key">Pending</span>
           </div>
           <div class="diag-stat">
-            <span class="diag-stat-value">{diagnostics.queue.itemsInBackoff}</span>
-            <span class="diag-stat-label">In Backoff</span>
+            <span class="diag-val">{diagnostics.queue.itemsInBackoff}</span>
+            <span class="diag-key">In Backoff</span>
           </div>
         </div>
         {#if diagnostics.queue.oldestPendingTimestamp}
-          <div class="diag-row">
-            <span class="diag-row-label">Oldest Pending</span>
-            <span class="diag-row-value"
+          <div class="diag-kv">
+            <span class="diag-kv-label">Oldest Pending</span>
+            <span class="diag-kv-value"
               >{formatTimestamp(diagnostics.queue.oldestPendingTimestamp)}</span
             >
           </div>
         {/if}
 
         <!-- 6. Engine -->
-        <div class="diag-section-title">Engine</div>
-        <div class="diag-row">
-          <span class="diag-row-label">Tab Visible</span>
-          <span class="diag-row-value">{diagnostics.engine.isTabVisible ? 'Yes' : 'No'}</span>
+        <div class="diag-heading">Engine</div>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Tab Visible</span>
+          <span class="diag-kv-value">{diagnostics.engine.isTabVisible ? 'Yes' : 'No'}</span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Lock Held</span>
-          <span class="diag-row-value">
+        <div class="diag-kv">
+          <span class="diag-kv-label">Lock Held</span>
+          <span class="diag-kv-value">
             {diagnostics.engine.lockHeld ? 'Yes' : 'No'}
             {#if diagnostics.engine.lockHeld && diagnostics.engine.lockHeldForMs}
-              <span class="diag-lock-duration"
-                >({formatDuration(diagnostics.engine.lockHeldForMs)})</span
+              <span class="diag-lock-dur">({formatDuration(diagnostics.engine.lockHeldForMs)})</span
               >
             {/if}
           </span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Recently Modified</span>
-          <span class="diag-row-value">{diagnostics.engine.recentlyModifiedCount}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Recently Modified</span>
+          <span class="diag-kv-value">{diagnostics.engine.recentlyModifiedCount}</span>
         </div>
 
         <!-- 7. Recent Cycles -->
         {#if diagnostics.sync.recentCycles.length > 0}
-          <div class="diag-section-title">Recent Cycles</div>
+          <div class="diag-heading">Recent Cycles</div>
           <div class="diag-cycles">
             {#each diagnostics.sync.recentCycles.slice(0, 5) as cycle (cycle.timestamp)}
-              <div class="diag-cycle-item">
-                <div class="diag-cycle-header">
+              <div class="diag-cycle">
+                <div class="diag-cycle-head">
                   <span class="diag-cycle-trigger">{cycle.trigger}</span>
                   <span class="diag-cycle-time">{formatTimestamp(cycle.timestamp)}</span>
                 </div>
@@ -1327,130 +1296,124 @@
 
         <!-- 8. Conflicts -->
         {#if diagnostics.conflicts.totalCount > 0}
-          <div class="diag-section-title">Conflicts</div>
-          <div class="diag-row">
-            <span class="diag-row-label">Total</span>
-            <span class="diag-row-value">{diagnostics.conflicts.totalCount}</span>
+          <div class="diag-heading">Conflicts</div>
+          <div class="diag-kv">
+            <span class="diag-kv-label">Total</span>
+            <span class="diag-kv-value">{diagnostics.conflicts.totalCount}</span>
           </div>
         {/if}
 
         <!-- 9. Errors -->
         {#if diagnostics.errors.lastError || diagnostics.errors.recentErrors.length > 0}
-          <div class="diag-section-title">Errors</div>
+          <div class="diag-heading">Errors</div>
           {#if diagnostics.errors.lastError}
-            <div class="diag-error-banner">
+            <div class="diag-err-box">
               {diagnostics.errors.lastError}
             </div>
           {/if}
           {#each diagnostics.errors.recentErrors.slice(0, 3) as err (err.entityId)}
-            <div class="diag-error-item">
-              <span class="diag-error-table">{err.table}.{err.operation}</span>
-              <span class="diag-error-msg">{err.message}</span>
+            <div class="diag-err-item">
+              <span class="diag-err-table">{err.table}.{err.operation}</span>
+              <span class="diag-err-msg">{err.message}</span>
             </div>
           {/each}
         {/if}
 
         <!-- 10. Configuration -->
-        <div class="diag-section-title">Configuration</div>
-        <div class="diag-config-tables">
-          <div class="diag-config-tables-header">
-            <span class="diag-row-label">Tables</span>
-            <span class="diag-row-value">{diagnostics.config.tableCount}</span>
+        <div class="diag-heading">Configuration</div>
+        <div class="diag-tables-block">
+          <div class="diag-tables-head">
+            <span class="diag-kv-label">Tables</span>
+            <span class="diag-kv-value">{diagnostics.config.tableCount}</span>
           </div>
-          <div class="diag-config-table-names">
+          <div class="diag-tags">
             {#each diagnostics.config.tableNames as name (name)}
-              <span class="diag-table-tag">{name}</span>
+              <span class="diag-tag">{name}</span>
             {/each}
           </div>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Sync Interval</span>
-          <span class="diag-row-value">{formatDuration(diagnostics.config.syncIntervalMs)}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Sync Interval</span>
+          <span class="diag-kv-value">{formatDuration(diagnostics.config.syncIntervalMs)}</span>
         </div>
-        <div class="diag-row">
-          <span class="diag-row-label">Debounce</span>
-          <span class="diag-row-value">{formatDuration(diagnostics.config.syncDebounceMs)}</span>
+        <div class="diag-kv">
+          <span class="diag-kv-label">Debounce</span>
+          <span class="diag-kv-value">{formatDuration(diagnostics.config.syncDebounceMs)}</span>
         </div>
 
         <!-- 11. Footer -->
-        <div class="diag-footer">
-          <span class="diag-footer-dot"></span>
+        <div class="diag-foot">
+          <span class="diag-tick"></span>
           Updated {formatTimestamp(diagnostics.timestamp)}
         </div>
       {/if}
-    </section>
-
-    <!-- ═══ Section: Debug Tools (conditional) ═══ -->
-    {#if debugMode}
-      <div class="ruling-divider section-enter" style="animation-delay: 480ms">
-        <span class="section-label section-label-debug">Developer's Notebook</span>
-        <span class="ruling-line ruling-line-debug"></span>
-      </div>
-
-      <section class="notebook-section debug-section section-enter" style="animation-delay: 480ms">
-        <div class="debug-actions">
-          <div class="debug-tool">
-            <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
-              {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
-            </button>
-            <p class="section-hint">
-              Resets sync cursor and re-downloads all data from the server.
-            </p>
-          </div>
-
-          <div class="debug-tool">
-            <button
-              class="btn btn-secondary"
-              onclick={handleTriggerSync}
-              disabled={triggeringSyncManual}
-            >
-              {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
-            </button>
-            <p class="section-hint">Manually triggers a push/pull sync cycle.</p>
-          </div>
-
-          <div class="debug-tool">
-            <button
-              class="btn btn-secondary"
-              onclick={handleResetSyncCursor}
-              disabled={resettingCursor}
-            >
-              {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
-            </button>
-            <p class="section-hint">Resets cursor so the next sync pulls all data.</p>
-          </div>
-
-          <div class="debug-tool">
-            <button
-              class="btn btn-secondary"
-              onclick={handleViewTombstones}
-              disabled={viewingTombstones}
-            >
-              {viewingTombstones ? 'Loading...' : 'View Tombstones'}
-            </button>
-            <p class="section-hint">Logs soft-deleted record counts per table to the console.</p>
-          </div>
-
-          <div class="debug-tool">
-            <button
-              class="btn btn-secondary"
-              onclick={handleCleanupTombstones}
-              disabled={cleaningTombstones}
-            >
-              {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
-            </button>
-            <p class="section-hint">
-              Permanently removes old soft-deleted records from local and server databases.
-            </p>
-          </div>
-        </div>
-      </section>
-    {/if}
-
-    <!-- ═══ Footer ═══ -->
-    <div class="notebook-footer section-enter" style="animation-delay: 540ms">
-      <button class="btn btn-ghost" onclick={goBack}>Back to Home</button>
     </div>
+  </div>
+
+  <!-- Section: Debug Tools (conditional) -->
+  {#if debugMode}
+    <div class="section-reveal" style="animation-delay: 400ms">
+      <p class="section-label section-label--debug">Debug Tools</p>
+      <div class="card card--debug">
+        <div class="debug-item">
+          <button class="btn btn-secondary" onclick={handleForceFullSync} disabled={forceSyncing}>
+            {forceSyncing ? 'Syncing...' : 'Force Full Sync'}
+          </button>
+          <p class="hint">Resets sync cursor and re-downloads all data from the server.</p>
+        </div>
+
+        <div class="debug-item">
+          <button
+            class="btn btn-secondary"
+            onclick={handleTriggerSync}
+            disabled={triggeringSyncManual}
+          >
+            {triggeringSyncManual ? 'Syncing...' : 'Trigger Sync Cycle'}
+          </button>
+          <p class="hint">Manually triggers a push/pull sync cycle.</p>
+        </div>
+
+        <div class="debug-item">
+          <button
+            class="btn btn-secondary"
+            onclick={handleResetSyncCursor}
+            disabled={resettingCursor}
+          >
+            {resettingCursor ? 'Resetting...' : 'Reset Sync Cursor'}
+          </button>
+          <p class="hint">Resets cursor so the next sync pulls all data.</p>
+        </div>
+
+        <div class="debug-item">
+          <button
+            class="btn btn-secondary"
+            onclick={handleViewTombstones}
+            disabled={viewingTombstones}
+          >
+            {viewingTombstones ? 'Loading...' : 'View Tombstones'}
+          </button>
+          <p class="hint">Logs soft-deleted record counts per table to the console.</p>
+        </div>
+
+        <div class="debug-item">
+          <button
+            class="btn btn-secondary"
+            onclick={handleCleanupTombstones}
+            disabled={cleaningTombstones}
+          >
+            {cleaningTombstones ? 'Cleaning...' : 'Cleanup Tombstones'}
+          </button>
+          <p class="hint">
+            Permanently removes old soft-deleted records from local and server databases.
+          </p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Footer -->
+  <div class="profile-footer section-reveal" style="animation-delay: 450ms">
+    <button class="btn btn-ghost" onclick={goBack}>Back to Home</button>
   </div>
 
   {#if demoToast}
@@ -1459,33 +1422,24 @@
 </div>
 
 <style>
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     NOTEBOOK PAGE LAYOUT
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .notebook-page {
-    padding: var(--space-6) var(--space-4);
-    max-width: 620px;
+  /* Page layout */
+  .profile-page {
+    max-width: 660px;
     margin: 0 auto;
-  }
-
-  .notebook-content {
+    padding: 40px 20px 48px;
     display: flex;
     flex-direction: column;
+    gap: 20px;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     SECTION ENTRANCE ANIMATION
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .section-enter {
-    animation: sectionFadeUp var(--duration-normal) var(--ease-out) both;
+  /* Staggered reveal */
+  .section-reveal {
+    animation: revealUp 0.4s var(--ease-out) both;
   }
-
-  @keyframes sectionFadeUp {
+  @keyframes revealUp {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
@@ -1493,23 +1447,37 @@
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     PROFILE HEADER
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .profile-header {
-    text-align: center;
-    padding: var(--space-8) 0 var(--space-6);
+  /* Section labels — ABOVE cards, Apple Settings style */
+  .section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    padding-left: 4px;
+    margin: 0 0 8px;
+  }
+  .section-label--danger {
+    color: var(--color-red);
+  }
+  .section-label--debug {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
   }
 
+  /* Profile hero */
+  .profile-hero {
+    text-align: center;
+    padding: 0 0 28px;
+  }
+
+  /* Avatar with gradient ring */
   .avatar-ring {
-    width: 88px;
-    height: 88px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
-    margin: 0 auto var(--space-4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 0 auto 16px;
+    padding: 3px;
     background: conic-gradient(
       from 180deg,
       var(--color-primary-light),
@@ -1518,210 +1486,117 @@
       var(--color-primary),
       var(--color-primary-light)
     );
-    padding: 3px;
     box-shadow:
-      0 0 20px var(--color-primary-glow),
+      0 0 24px var(--color-primary-glow),
       var(--shadow-md);
   }
-
-  .avatar {
-    width: 82px;
-    height: 82px;
+  .avatar-disc {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     background: var(--gradient-primary);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 600;
     font-family: var(--font-display);
   }
 
   .profile-name {
-    font-size: 1.625rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
     color: var(--color-text);
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
-
   .profile-email {
     font-size: 0.875rem;
     color: var(--color-text-muted);
-    margin: var(--space-1) 0 0;
-    letter-spacing: 0.01em;
+    margin: 4px 0 0;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     RULING DIVIDER — Notebook section headers
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .ruling-divider {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
-    margin-bottom: var(--space-1);
-  }
-
-  .section-label {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--color-primary);
-    white-space: nowrap;
-    font-variant: small-caps;
-    font-family: var(--font-display);
-  }
-
-  .ruling-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, var(--color-primary-subtle), transparent);
-  }
-
-  .section-label-danger {
-    color: var(--color-red);
-  }
-
-  .ruling-line-danger {
-    background: linear-gradient(
-      to right,
-      color-mix(in srgb, var(--color-red) 30%, transparent),
-      transparent
-    );
-  }
-
-  .section-label-debug {
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-    font-variant: normal;
-    font-size: 0.625rem;
-    letter-spacing: 0.08em;
-  }
-
-  .ruling-line-debug {
-    height: 1px;
-    border: none;
-    background: repeating-linear-gradient(
-      to right,
-      var(--color-border),
-      var(--color-border) 4px,
-      transparent 4px,
-      transparent 8px
-    );
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     NOTEBOOK SECTIONS — continuous page feel
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .notebook-section {
-    padding: var(--space-4) 0;
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     FORM ELEMENTS — ruled-line style
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .form-row {
+  /* Forms */
+  .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    gap: 20px;
   }
-
-  .form-group {
-    margin-bottom: var(--space-4);
+  .field {
+    margin-bottom: 20px;
   }
-
-  .form-group label {
+  .field-label {
     display: block;
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--color-text-secondary);
-    margin-bottom: var(--space-1);
-    letter-spacing: 0.01em;
+    margin-bottom: 6px;
   }
-
-  .form-group input {
+  .field-input {
     width: 100%;
-  }
-
-  .ruled-input {
     background: transparent;
     border: none;
     border-bottom: 1.5px solid var(--color-border);
     border-radius: 0;
-    padding: var(--space-2) var(--space-1);
+    padding: 10px 2px;
     font-size: 0.9375rem;
     color: var(--color-text);
-    transition:
-      border-color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
     outline: none;
+    transition:
+      border-color 160ms,
+      box-shadow 160ms;
   }
-
-  .ruled-input:focus {
+  .field-input:focus {
     border-bottom-color: var(--color-primary);
     box-shadow: 0 2px 8px var(--color-primary-glow);
   }
-
-  .ruled-input::placeholder {
+  .field-input::placeholder {
     color: var(--color-text-muted);
     opacity: 0.5;
   }
-
-  .ruled-input:disabled {
+  .field-input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  .current-value {
+  /* Current value display */
+  .current-email {
     font-size: 0.8125rem;
     color: var(--color-text-secondary);
-    margin: 0 0 var(--space-3);
+    margin: 0 0 16px;
   }
-
-  .current-value-text {
+  .current-email-addr {
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
     color: var(--color-text);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     DIGIT CODE INPUTS — typewriter key / combination lock style
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
+  /* Digit code inputs */
   .digit-row {
     display: flex;
-    gap: var(--space-2);
+    gap: 10px;
     justify-content: center;
-    margin: var(--space-3) 0;
+    margin: 16px 0;
   }
-
-  .digit-input {
-    width: 46px;
-    height: 54px;
+  .digit-box {
+    width: 44px;
+    height: 52px;
     text-align: center;
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     font-family: var(--font-mono);
     font-weight: 700;
-    letter-spacing: 0;
     border: 1.5px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-bg-secondary);
     color: var(--color-text);
     box-shadow: var(--shadow-sm), var(--shadow-inset);
     transition:
-      border-color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out),
-      transform var(--duration-fast) var(--ease-out);
+      border-color 160ms,
+      box-shadow 160ms,
+      transform 160ms;
   }
-
-  .digit-input:focus {
+  .digit-box:focus {
     border-color: var(--color-primary);
     box-shadow:
       0 0 0 3px var(--color-primary-glow),
@@ -1729,156 +1604,103 @@
     outline: none;
     transform: translateY(-1px);
   }
-
-  .digit-input:disabled {
+  .digit-box:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  .section-hint {
+  /* Hint text inside cards */
+  .hint {
     font-size: 0.8125rem;
     color: var(--color-text-muted);
-    margin: 0 0 var(--space-3);
+    margin: 0 0 16px;
     line-height: 1.5;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     FEEDBACK MESSAGES
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .error-message {
+  /* Feedback messages */
+  .msg-error {
     color: var(--color-red);
     font-size: 0.8125rem;
-    margin: var(--space-2) 0;
+    margin: 8px 0;
     font-weight: 500;
   }
-
-  .success-message {
+  .msg-success {
     color: var(--color-green);
     font-size: 0.8125rem;
-    margin: var(--space-2) 0;
+    margin: 8px 0;
     font-weight: 500;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     TRUSTED DEVICES — index card style
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .device-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .device-card {
+  /* Device list */
+  .device-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-sm);
-    transition:
-      transform var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-border);
   }
-
-  .device-card:hover {
-    box-shadow: var(--shadow-md);
+  .device-row:last-child {
+    border-bottom: none;
   }
-
-  .device-card-current {
-    border-color: var(--color-primary-subtle);
-    background: color-mix(in srgb, var(--color-primary-subtle) 20%, var(--color-bg-secondary));
-  }
-
-  .device-info {
+  .device-meta {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-
-  .device-name {
+  .device-label {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text);
   }
-
-  .device-stamp {
+  .device-badge {
     display: inline-block;
     width: fit-content;
-    font-size: 0.5625rem;
-    font-weight: 800;
+    font-size: 0.625rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
     color: var(--color-primary);
-    border: 1.5px solid var(--color-primary);
-    border-radius: var(--radius-xs);
-    padding: 1px 6px;
-    transform: rotate(-2deg);
-    opacity: 0.85;
+    background: var(--color-primary-subtle);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
   }
-
   .device-date {
     font-size: 0.75rem;
     color: var(--color-text-muted);
   }
-
-  .empty-state {
+  .empty-msg {
     font-size: 0.875rem;
     color: var(--color-text-muted);
     text-align: center;
-    padding: var(--space-4) 0;
-    font-style: italic;
+    padding: 16px 0;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     SETTINGS ROWS
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .setting-row {
+  /* Setting rows */
+  .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-4) 0;
+    padding: 16px 0;
     border-bottom: 1px solid var(--color-border);
   }
-
-  .setting-row:last-child {
+  .setting-item:last-child {
     border-bottom: none;
   }
-
-  .setting-row strong {
+  .setting-item strong {
     display: block;
     font-size: 0.875rem;
     color: var(--color-text);
   }
-
-  .setting-row .section-hint {
-    margin: var(--space-1) 0 0;
+  .setting-item .hint {
+    margin: 4px 0 0;
     font-size: 0.8125rem;
   }
-
-  .setting-row.danger strong {
+  .setting-item.danger strong {
     color: var(--color-red);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     DANGER SECTION — red margin line
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .danger-section {
-    border-left: 2px solid color-mix(in srgb, var(--color-red) 40%, transparent);
-    padding-left: var(--space-4);
-    margin-left: var(--space-1);
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     TOGGLE BUTTON
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .toggle-btn {
+  /* Toggle switch */
+  .toggle {
     position: relative;
     width: 48px;
     height: 28px;
@@ -1886,15 +1708,13 @@
     border: none;
     background: var(--color-bg-tertiary);
     cursor: pointer;
-    transition: background var(--duration-fast) var(--ease-out);
+    transition: background 160ms;
     flex-shrink: 0;
   }
-
-  .toggle-btn.active {
+  .toggle.on {
     background: var(--color-primary);
   }
-
-  .toggle-knob {
+  .toggle-pip {
     position: absolute;
     top: 3px;
     left: 3px;
@@ -1903,58 +1723,43 @@
     border-radius: 50%;
     background: white;
     box-shadow: var(--shadow-sm);
-    transition: transform var(--duration-fast) var(--ease-out);
+    transition: transform 160ms var(--ease-out);
   }
-
-  .toggle-btn.active .toggle-knob {
+  .toggle.on .toggle-pip {
     transform: translateX(20px);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     DEBUG TOOLS — Developer's Notebook aesthetic
-     ═══════════════════════════════════════════════════════════════════════════════════ */
+  /* Danger card */
+  .card--danger {
+    border-left: 2px solid color-mix(in srgb, var(--color-red) 35%, transparent);
+  }
 
-  .debug-section {
-    border: 1px dashed var(--color-border-strong);
-    border-radius: var(--radius-sm);
-    padding: var(--space-4);
+  /* Debug card */
+  .card--debug {
+    border-style: dashed;
     background: var(--color-bg-secondary);
   }
-
-  .debug-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .debug-tool {
-    padding: var(--space-2) 0;
+  .debug-item {
+    padding: 12px 0;
     border-bottom: 1px dashed var(--color-border);
   }
-
-  .debug-tool:last-child {
+  .debug-item:last-child {
     border-bottom: none;
   }
-
-  .debug-tool .btn {
+  .debug-item .btn {
     width: 100%;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
   }
-
-  .debug-tool .section-hint {
-    margin: var(--space-1) 0 0;
-    padding-left: var(--space-1);
+  .debug-item .hint {
+    margin: 6px 0 0;
+    padding-left: 2px;
     font-size: 0.75rem;
     font-family: var(--font-mono);
-    color: var(--color-text-muted);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     EMAIL CONFIRMATION MODAL
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .modal-overlay {
+  /* Modal */
+  .modal-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
@@ -1963,114 +1768,94 @@
     align-items: center;
     justify-content: center;
     z-index: 100;
-    padding: var(--space-4);
+    padding: 20px;
   }
-
-  .modal-card {
+  .modal-pane {
     background: var(--color-bg-elevated);
     border-radius: var(--radius-lg);
-    padding: var(--space-8) var(--space-6);
+    padding: 40px 28px;
     max-width: 400px;
     width: 100%;
     text-align: center;
     box-shadow: var(--shadow-xl);
   }
-
   .modal-icon {
     color: var(--color-primary);
-    margin-bottom: var(--space-4);
+    margin-bottom: 20px;
   }
-
-  .modal-title {
+  .modal-heading {
     font-size: 1.25rem;
     font-weight: 600;
-    margin: 0 0 var(--space-2);
+    margin: 0 0 8px;
     font-family: var(--font-display);
   }
-
-  .modal-text {
+  .modal-body {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
-    margin: 0 0 var(--space-6);
+    margin: 0 0 28px;
     line-height: 1.5;
   }
-
-  .modal-resend {
+  .modal-primary {
     width: 100%;
-    margin-bottom: var(--space-3);
+    margin-bottom: 12px;
   }
-
   .modal-dismiss {
     width: 100%;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     FOOTER
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .notebook-footer {
+  /* Footer */
+  .profile-footer {
     text-align: center;
-    padding: var(--space-6) 0 var(--space-4);
+    padding: 32px 0 8px;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     DIAGNOSTICS — technical appendix with graph paper texture
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
-  .diag-appendix {
-    background:
+  /* Diagnostics panel — graph paper texture */
+  .diag-panel {
+    background-image:
       linear-gradient(var(--color-border) 1px, transparent 1px),
       linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
     background-size: 20px 20px;
     background-position: -1px -1px;
-    padding: var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
   }
 
-  .diag-status-banner {
+  /* Diagnostics internals */
+  .diag-banner {
     display: flex;
     align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1rem;
+    gap: 12px;
+    padding: 12px 14px;
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
-
-  .diag-status-dot {
+  .diag-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
   }
-
-  .diag-status-dot--green {
+  .diag-dot--green {
     background: var(--color-green);
     box-shadow: 0 0 8px color-mix(in srgb, var(--color-green) 50%, transparent);
-    animation: statusPulse 3s ease-in-out infinite;
+    animation: pulse 3s ease-in-out infinite;
   }
-
-  .diag-status-dot--blue {
+  .diag-dot--blue {
     background: var(--color-primary);
     box-shadow: 0 0 8px var(--color-primary-glow);
-    animation: statusPulse 1s ease-in-out infinite;
+    animation: pulse 1s ease-in-out infinite;
   }
-
-  .diag-status-dot--yellow {
+  .diag-dot--yellow {
     background: #ffd43b;
     box-shadow: 0 0 8px rgba(255, 212, 59, 0.4);
-    animation: statusPulse 2s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite;
   }
-
-  .diag-status-dot--red {
+  .diag-dot--red {
     background: var(--color-red);
     box-shadow: 0 0 8px var(--color-red-glow);
-    animation: statusPulse 0.8s ease-in-out infinite;
+    animation: pulse 0.8s ease-in-out infinite;
   }
-
-  @keyframes statusPulse {
+  @keyframes pulse {
     0%,
     100% {
       opacity: 1;
@@ -2081,176 +1866,136 @@
       transform: scale(0.85);
     }
   }
-
-  .diag-status-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
-  .diag-status-label {
+  .diag-label {
     font-size: 0.875rem;
     font-weight: 700;
     color: var(--color-text);
   }
-
-  .diag-status-meta {
+  .diag-sub {
     font-size: 0.6875rem;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
   }
-
-  .diag-section-title {
+  .diag-heading {
     font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     color: var(--color-text-muted);
-    margin: 1.25rem 0 0.5rem;
+    margin: 20px 0 8px;
     font-family: var(--font-mono);
   }
-
-  .diag-grid {
+  .diag-grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+    gap: 8px;
   }
-
   .diag-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+    gap: 8px;
   }
-
   .diag-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.1875rem;
-    padding: 0.625rem 0.375rem;
+    gap: 3px;
+    padding: 10px 6px;
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xs);
-    font-variant-numeric: tabular-nums;
   }
-
-  .diag-stat-value {
+  .diag-val {
     font-size: 1rem;
     font-weight: 700;
     color: var(--color-text);
-    font-variant-numeric: tabular-nums;
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
-
-  .diag-stat-label {
+  .diag-key {
     font-size: 0.5625rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--color-text-muted);
   }
-
-  @media (max-width: 640px) {
-    .diag-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .diag-badges {
-    display: flex;
-    gap: 0.375rem;
-    margin-top: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .diag-badge-ok {
+  .diag-pill {
     display: inline-flex;
-    padding: 0.1875rem 0.5rem;
+    padding: 2px 8px;
     font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+  }
+  .diag-pill--ok {
     color: var(--color-green);
     background: color-mix(in srgb, var(--color-green) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-green) 25%, transparent);
-    font-family: var(--font-mono);
   }
-
-  .diag-badge-warn {
-    display: inline-flex;
-    padding: 0.1875rem 0.5rem;
-    font-size: 0.625rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-radius: var(--radius-xs);
+  .diag-pill--warn {
     color: #ffd43b;
     background: rgba(255, 212, 59, 0.12);
     border: 1px solid rgba(255, 212, 59, 0.25);
-    font-family: var(--font-mono);
   }
-
-  .diag-row {
+  .diag-pills {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .diag-kv {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.4375rem 0;
+    padding: 7px 0;
     border-bottom: 1px solid var(--color-border);
     font-variant-numeric: tabular-nums;
-    gap: 0.75rem;
+    gap: 12px;
   }
-
-  .diag-row:last-of-type {
+  .diag-kv:last-of-type {
     border-bottom: none;
   }
-
-  .diag-row-label {
+  .diag-kv-label {
     font-size: 0.75rem;
     color: var(--color-text-muted);
-    flex-shrink: 0;
     font-family: var(--font-mono);
+    flex-shrink: 0;
   }
-
-  .diag-row-value {
+  .diag-kv-value {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--color-text);
+    font-family: var(--font-mono);
     display: flex;
     align-items: center;
-    gap: 0.375rem;
-    min-width: 0;
+    gap: 6px;
     text-align: right;
-    font-family: var(--font-mono);
   }
-
-  .diag-lock-duration {
+  .diag-lock-dur {
     font-size: 0.6875rem;
     font-weight: 400;
     color: var(--color-text-muted);
   }
-
-  .diag-config-tables {
-    padding: 0.4375rem 0;
+  .diag-tables-block {
+    padding: 7px 0;
     border-bottom: 1px solid var(--color-border);
   }
-
-  .diag-config-tables-header {
+  .diag-tables-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.375rem;
+    margin-bottom: 6px;
   }
-
-  .diag-config-table-names {
+  .diag-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3125rem;
+    gap: 5px;
   }
-
-  .diag-table-tag {
+  .diag-tag {
     display: inline-flex;
-    padding: 0.125rem 0.4375rem;
+    padding: 2px 7px;
     font-size: 0.625rem;
     font-weight: 600;
     font-family: var(--font-mono);
@@ -2259,97 +2004,86 @@
     border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
     border-radius: var(--radius-xs);
   }
-
   .diag-inline-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
   }
-
   .diag-inline-dot--green {
     background: var(--color-green);
     box-shadow: 0 0 4px color-mix(in srgb, var(--color-green) 40%, transparent);
   }
-
   .diag-inline-dot--yellow {
     background: #ffd43b;
     box-shadow: 0 0 4px rgba(255, 212, 59, 0.4);
   }
-
   .diag-inline-dot--red {
     background: var(--color-red);
     box-shadow: 0 0 4px var(--color-red-glow);
   }
 
-  .diag-table-bars {
+  /* Data transfer bars */
+  .diag-bars {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.625rem;
+    gap: 8px;
+    margin-top: 10px;
   }
-
-  .diag-table-row {
+  .diag-bar-row {
     display: flex;
     flex-direction: column;
-    gap: 0.1875rem;
+    gap: 3px;
   }
-
-  .diag-table-header {
+  .diag-bar-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-
-  .diag-table-name {
+  .diag-bar-name {
     font-size: 0.6875rem;
     font-weight: 600;
     color: var(--color-text);
     font-family: var(--font-mono);
   }
-
-  .diag-table-pct {
+  .diag-bar-pct {
     font-size: 0.625rem;
     font-weight: 600;
     color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
-
-  .diag-progress-bar {
+  .diag-bar-track {
     height: 4px;
     background: color-mix(in srgb, var(--color-primary) 10%, transparent);
     border-radius: 2px;
     overflow: hidden;
   }
-
-  .diag-progress-fill {
+  .diag-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
     border-radius: 2px;
     transition: width 600ms var(--ease-out);
   }
 
+  /* Recent cycles */
   .diag-cycles {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: 6px;
   }
-
-  .diag-cycle-item {
-    padding: 0.5rem 0.75rem;
+  .diag-cycle {
+    padding: 8px 12px;
     background: var(--color-bg);
     border-left: 2px solid var(--color-primary-subtle);
     border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   }
-
-  .diag-cycle-header {
+  .diag-cycle-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.1875rem;
+    margin-bottom: 3px;
   }
-
   .diag-cycle-trigger {
     font-size: 0.6875rem;
     font-weight: 700;
@@ -2358,48 +2092,44 @@
     letter-spacing: 0.06em;
     font-family: var(--font-mono);
   }
-
   .diag-cycle-time {
     font-size: 0.625rem;
     color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
-
   .diag-cycle-stats {
     display: flex;
-    gap: 0.625rem;
+    gap: 10px;
     font-size: 0.625rem;
     color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
-  .diag-error-banner {
-    padding: 0.625rem 0.875rem;
+  /* Errors */
+  .diag-err-box {
+    padding: 10px 14px;
     background: color-mix(in srgb, var(--color-red) 8%, var(--color-bg));
     border: 1px solid color-mix(in srgb, var(--color-red) 20%, transparent);
     border-radius: var(--radius-xs);
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--color-red);
-    margin-bottom: 0.375rem;
+    margin-bottom: 6px;
     font-family: var(--font-mono);
   }
-
-  .diag-error-item {
+  .diag-err-item {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
-    padding: 0.375rem 0;
+    gap: 2px;
+    padding: 6px 0;
     border-bottom: 1px solid color-mix(in srgb, var(--color-red) 10%, transparent);
   }
-
-  .diag-error-item:last-child {
+  .diag-err-item:last-child {
     border-bottom: none;
   }
-
-  .diag-error-table {
+  .diag-err-table {
     font-size: 0.625rem;
     font-weight: 700;
     color: var(--color-red);
@@ -2407,35 +2137,33 @@
     letter-spacing: 0.06em;
     font-family: var(--font-mono);
   }
-
-  .diag-error-msg {
+  .diag-err-msg {
     font-size: 0.6875rem;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
   }
 
-  .diag-footer {
+  /* Diagnostics footer */
+  .diag-foot {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
-    margin-top: 1rem;
-    padding-top: 0.625rem;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 10px;
     border-top: 1px solid var(--color-border);
     font-size: 0.625rem;
     color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
-
-  .diag-footer-dot {
+  .diag-tick {
     width: 5px;
     height: 5px;
     border-radius: 50%;
     background: var(--color-primary-subtle);
-    animation: footerTick 2.5s ease-in-out infinite;
+    animation: tick 2.5s ease-in-out infinite;
   }
-
-  @keyframes footerTick {
+  @keyframes tick {
     0%,
     100% {
       opacity: 0.4;
@@ -2445,17 +2173,14 @@
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     DEMO TOAST
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
+  /* Demo toast */
   .demo-toast {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 9500;
-    padding: 1rem 2rem;
+    padding: 16px 32px;
     background: color-mix(in srgb, var(--color-primary) 90%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-xl);
@@ -2465,13 +2190,11 @@
     font-size: 1rem;
     font-weight: 600;
     white-space: nowrap;
-    text-align: center;
     box-shadow: var(--shadow-xl);
-    animation: demoToastIn 0.3s var(--ease-out);
+    animation: toastIn 0.3s var(--ease-out);
     pointer-events: none;
   }
-
-  @keyframes demoToastIn {
+  @keyframes toastIn {
     from {
       opacity: 0;
       transform: translate(-50%, -50%) scale(0.9);
@@ -2482,55 +2205,42 @@
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════
-     RESPONSIVE
-     ═══════════════════════════════════════════════════════════════════════════════════ */
-
+  /* Responsive */
   @media (max-width: 480px) {
-    .notebook-page {
-      padding: var(--space-4) var(--space-3);
+    .profile-page {
+      padding: 24px 16px 40px;
     }
-
-    .form-row {
+    .field-row {
       grid-template-columns: 1fr;
     }
-
-    .digit-input {
-      width: 40px;
-      height: 48px;
-      font-size: 1.1875rem;
+    .digit-box {
+      width: 38px;
+      height: 46px;
+      font-size: 1.125rem;
     }
-
-    .diag-stat-value {
-      font-size: 0.875rem;
+    .diag-grid-4 {
+      grid-template-columns: repeat(2, 1fr);
     }
-
     .diag-grid-2 {
       grid-template-columns: 1fr;
     }
-
     .diag-cycle-stats {
       flex-wrap: wrap;
     }
-
-    .diag-table-tag {
-      font-size: 0.5625rem;
-    }
-
-    .diag-appendix {
+    .diag-panel {
       background-size: 16px 16px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .section-enter {
+    .section-reveal {
       animation: none;
     }
-    .diag-status-dot,
-    .diag-footer-dot {
+    .diag-dot,
+    .diag-tick {
       animation: none;
     }
-    .diag-progress-fill {
+    .diag-bar-fill {
       transition: none;
     }
   }
