@@ -32,7 +32,6 @@
   /* ── Stellar Drive — CRDT & Utilities ── */
   import { closeDocument } from 'stellar-drive/crdt';
   import { debug } from 'stellar-drive/utils';
-  import SyncStatus from 'stellar-drive/components/SyncStatus';
 
   /* ── App Stores ── */
   import {
@@ -202,11 +201,6 @@
       onMove={() => (showMoveModal = true)}
     />
 
-    <!-- ── Sync Status ── -->
-    <div class="sync-status-row">
-      <SyncStatus />
-    </div>
-
     <!-- ── Editor Content Area ── -->
     <div class="note-content">
       <!-- ── Title / Icon ── -->
@@ -264,8 +258,9 @@
      SYNC STATUS ROW
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  .sync-status-row {
-    padding: 0.5rem 0;
+  /* Shift the layout's fixed sync status indicator below the note header */
+  :global(.desktop-sync) {
+    top: 60px !important;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════

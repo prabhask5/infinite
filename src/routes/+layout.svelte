@@ -39,6 +39,7 @@
   /* ── Components ── */
   import DemoBanner from 'stellar-drive/components/DemoBanner';
   import SyncStatus from 'stellar-drive/components/SyncStatus';
+
   import UpdatePrompt from '$lib/components/UpdatePrompt.svelte';
 
   /* ── Types ── */
