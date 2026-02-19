@@ -588,6 +588,8 @@
         }, 500);
         codeDigits = ['', '', '', '', '', ''];
         confirmDigits = ['', '', '', '', '', ''];
+        loading = false;
+        await tick();
         if (codeInputs[0]) codeInputs[0].focus();
         return;
       }
@@ -648,6 +650,9 @@
           shaking = false;
         }, 500);
         unlockDigits = ['', '', '', '', '', ''];
+        loading = false;
+        await tick();
+        if (unlockInputs[0]) unlockInputs[0].focus();
         return;
       }
       if (result.deviceVerificationRequired) {
@@ -719,6 +724,9 @@
           shaking = false;
         }, 500);
         linkDigits = Array(remoteUser.codeLength).fill('');
+        linkLoading = false;
+        await tick();
+        if (linkInputs[0]) linkInputs[0].focus();
         return;
       }
       if (result.deviceVerificationRequired) {
