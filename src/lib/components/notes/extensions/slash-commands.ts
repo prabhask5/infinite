@@ -5,7 +5,8 @@
  * a block or after a space. Shows a filtered dropdown of available block types
  * that the user can navigate with arrow keys and select with Enter.
  *
- * Commands: text, header1-4, bullet, todo, code, image, bookmark, sub-page, toc.
+ * Phase 1 commands: text, header1-4, bullet, todo, code.
+ * Phase 2 will add: link, note, image, tableofcontents.
  *
  * @see {@link ../SlashCommandMenu.svelte} for the floating dropdown UI
  */
@@ -18,8 +19,6 @@ import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 import type { Editor, Range } from '@tiptap/core';
 import type { SuggestionOptions } from '@tiptap/suggestion';
-import { openImagePicker, uploadImage } from '$lib/services/image-upload';
-import { debug } from 'stellar-drive/utils';
 
 // =============================================================================
 //  Types
@@ -36,7 +35,7 @@ export interface SlashCommandItem {
   /** Icon label for visual identification. */
   icon: string;
   /** The action to execute when this command is selected. */
-  action: (editor: Editor, range: Range) => void | Promise<void>;
+  action: (editor: Editor, range: Range) => void;
 }
 
 /** Props passed to the slash command menu renderer. */
@@ -122,73 +121,6 @@ export const slashCommands: SlashCommandItem[] = [
     icon: '</>',
     action: (editor, range) => {
       editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
-    }
-  },
-  {
-    title: 'Image',
-    description: 'Upload or paste an image',
-    command: 'image',
-    icon: '\u{1F5BC}',
-    action: async (editor, range) => {
-      editor.chain().focus().deleteRange(range).run();
-      const file = await openImagePicker();
-      if (!file) return;
-      const src = await uploadImage(file, 'slash-command');
-      if (src) {
-        editor.commands.insertImage({ src, alt: file.name });
-      }
-    }
-  },
-  {
-    title: 'Bookmark',
-    description: 'Embed a link preview card',
-    command: 'bookmark',
-    icon: '\u{1F310}',
-    action: (editor, range) => {
-      editor.chain().focus().deleteRange(range).run();
-      const url = window.prompt('Enter URL:');
-      if (url) {
-        editor.chain().focus().insertLinkPreview({ url }).run();
-      }
-    }
-  },
-  {
-    title: 'Sub-page',
-    description: 'Create and embed a child note',
-    command: 'subpage',
-    icon: '\u{1F4C4}',
-    action: async (editor, range) => {
-      editor.chain().focus().deleteRange(range).run();
-      try {
-        const { createNote } = await import('$lib/stores/notes');
-        const noteId =
-          (editor.options.element as HTMLElement)
-            ?.closest('[data-note-id]')
-            ?.getAttribute('data-note-id') ?? undefined;
-        const child = await createNote(noteId ?? null);
-        if (child) {
-          editor
-            .chain()
-            .focus()
-            .insertNoteBlock({
-              noteId: child.id,
-              noteTitle: child.title || 'Untitled',
-              noteIcon: child.icon || undefined
-            })
-            .run();
-        }
-      } catch (err) {
-        debug('error', '[SlashCommands] Failed to create sub-page:', err);
-      }
-    }
-  },
-  {
-    title: 'Table of Contents',
-    description: 'Live outline of all headings',
-    command: 'toc',
-    icon: '\u{1F4D1}',
-    action: (editor, range) => {
-      editor.chain().focus().deleteRange(range).insertToc().run();
     }
   }
 ];

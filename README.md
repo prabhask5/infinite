@@ -29,14 +29,7 @@ An offline-first, self-hosted progressive web app for writing and organizing not
 ## Features
 
 - **Rich text editing** -- Tiptap-powered editor with headings, bullet lists, to-do lists, code blocks, inline formatting (bold, italic, underline, strikethrough, links), and a slash command palette.
-- **Slash commands** -- type `/` to insert headings, lists, code blocks, images, bookmarks, sub-pages, and a table of contents from a filterable dropdown.
-- **Comments** -- highlight text and leave comments. A slide-in panel lists all comments for each note with resolve/delete support.
-- **Image blocks** -- paste, drop, or slash-command insert images with resize handles. Images are stored as data URLs for offline-first compatibility.
-- **Link preview bookmarks** -- insert rich bookmark cards that fetch Open Graph metadata (title, description, image) from any URL.
-- **Sub-page blocks** -- embed a child note as a card block. Clicking it navigates to the nested note.
-- **Table of contents** -- insert a live-updating TOC block that lists all headings in the current note.
-- **Drag-and-drop reordering** -- drag handles appear on hover for every block, enabling native drag-and-drop block reordering.
-- **Offline availability toggle** -- mark individual notes as "available offline" to persist their CRDT state to IndexedDB for guaranteed offline access.
+- **Slash commands** -- type `/` to insert headings, lists, code blocks, and more from a filterable dropdown.
 - **Offline-first** -- reads and writes work without any network connection; changes sync automatically when connectivity returns.
 - **CRDT collaboration** -- concurrent edits on multiple devices are merged without conflicts using Yjs conflict-free replicated data types.
 - **Real-time sync** -- changes from other devices arrive instantly via Supabase Realtime WebSocket subscriptions.
@@ -55,8 +48,7 @@ An offline-first, self-hosted progressive web app for writing and organizing not
 | Layer | Technology |
 |-------|-----------|
 | Framework | [SvelteKit 2](https://kit.svelte.dev) + [Svelte 5](https://svelte.dev) (runes) |
-| Rich text editor | [Tiptap 3](https://tiptap.dev) (ProseMirror wrapper) + custom extensions |
-| HTML parsing | [cheerio](https://cheerio.js.org) (server-side OG tag extraction) |
+| Rich text editor | [Tiptap 3](https://tiptap.dev) (ProseMirror wrapper) |
 | CRDT engine | [Yjs](https://yjs.dev) + [y-prosemirror](https://github.com/yjs/y-prosemirror) |
 | Backend | [Supabase](https://supabase.com) (auth, Postgres, realtime) |
 | Local storage | [Dexie.js](https://dexie.org) / IndexedDB |

@@ -18,11 +18,9 @@
   // ===========================================================================
 
   let {
-    editor,
-    onAddComment
+    editor
   }: {
     editor: Editor | null;
-    onAddComment?: () => void;
   } = $props();
 
   // ===========================================================================
@@ -176,22 +174,6 @@
     >
       <span style="font-size: 0.8rem;">{'\u{1F517}'}</span>
     </button>
-
-    {#if onAddComment}
-      <span class="toolbar-divider"></span>
-      <button
-        class="toolbar-btn"
-        type="button"
-        title="Add Comment"
-        aria-label="Add Comment"
-        onmousedown={(e) => {
-          e.preventDefault();
-          onAddComment?.();
-        }}
-      >
-        <span style="font-size: 0.8rem;">{'\u{1F4AC}'}</span>
-      </button>
-    {/if}
   </div>
 {/if}
 

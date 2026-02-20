@@ -97,8 +97,7 @@ export async function createNote(parentId?: string | null, title?: string): Prom
     last_edited_by: null,
     created_by: null,
     is_locked: false,
-    is_trashed: false,
-    is_offline: false
+    is_trashed: false
   };
 
   const result = (await engineCreate(TABLE, data)) as unknown as Note;
@@ -182,18 +181,6 @@ export async function moveNote(id: string, newParentId: string | null): Promise<
 export async function toggleLock(id: string, locked: boolean): Promise<void> {
   debug('log', '[Notes] Toggling lock:', id, locked);
   await updateNoteMeta(id, { is_locked: locked });
-}
-
-/**
- * Toggle offline availability for a note.
- * When enabled, the CRDT document will be persisted to IndexedDB.
- *
- * @param id - The note ID.
- * @param offline - Whether the note should be available offline.
- */
-export async function toggleOffline(id: string, offline: boolean): Promise<void> {
-  debug('log', '[Notes] Toggling offline:', id, offline);
-  await updateNoteMeta(id, { is_offline: offline });
 }
 
 // =============================================================================

@@ -158,11 +158,7 @@ RLS is a Postgres feature that attaches policies to tables so each row is only v
 
 ### Storage
 
-Supabase Storage is available for file uploads but is not currently used for images -- images are stored as inline data URLs within the CRDT document for offline-first compatibility. The CRDT binary data is stored directly in Postgres `bytea` columns.
-
-### cheerio (server-side HTML parsing)
-
-The link preview API route (`/api/link-preview`) uses [cheerio](https://cheerio.js.org) to parse fetched HTML and extract Open Graph meta tags (`og:title`, `og:description`, `og:image`). cheerio provides a jQuery-like API for server-side HTML manipulation without a full browser environment. It runs only in the SvelteKit server endpoint, never in client code.
+Supabase Storage is available for file uploads but is not currently used by Infinite Notes. The CRDT binary data is stored directly in Postgres `bytea` columns.
 
 ### Why Supabase here
 
@@ -347,24 +343,10 @@ const editor = new Editor({
 | `Underline` | Underline formatting |
 | `Link` | Clickable hyperlinks |
 | `SlashCommands` (custom) | Slash command palette triggered by `/` |
-| `CommentMark` (custom) | Inline `<mark>` with `commentId` attribute for highlighting commented text |
-| `ImageBlock` (custom) | Image node with resize handles and paste/drop upload support |
-| `LinkPreviewBlock` (custom) | Rich bookmark card displaying OG metadata from a URL |
-| `NoteBlock` (custom) | Embedded sub-page card that navigates to a child note on click |
-| `TocBlock` (custom) | Live-updating table of contents generated from document headings |
-| `DragHandle` (custom) | ProseMirror plugin that adds drag handles on hover for block reordering |
-
-### Custom extension patterns
-
-Custom Tiptap extensions in Infinite Notes follow two patterns:
-
-**Custom Marks** (e.g., `CommentMark`). Created with `Mark.create()`. Marks attach metadata to inline text ranges. The comment mark stores a `commentId` attribute and renders as a `<mark>` element with a `.comment-highlight` class. Marks are parsed from and serialized to HTML via `parseHTML` and `renderHTML` hooks.
-
-**Custom Nodes** (e.g., `ImageBlock`, `LinkPreviewBlock`, `NoteBlock`, `TocBlock`). Created with `Node.create()`. Nodes are block-level elements with their own attributes, `NodeView` rendering, and optional `addCommands()` for programmatic insertion. Each custom node defines `group: 'block'`, `atom: true` (non-editable content), and a `parseHTML`/`renderHTML` pair for serialization. The `DragHandle` extension is a pure ProseMirror plugin (no node/mark) that decorates the editor with floating drag handles.
 
 ### Slash commands
 
-The custom `SlashCommands` extension (in `src/lib/components/notes/extensions/slash-commands.ts`) uses `@tiptap/suggestion` to detect `/` input and show a floating dropdown. Available commands: Text, Heading 1-4, Bullet List, To-do List, Code Block, Image, Bookmark, Sub-page, Table of Contents. The dropdown supports keyboard navigation (arrow keys + Enter) and mouse selection.
+The custom `SlashCommands` extension (in `src/lib/components/notes/extensions/slash-commands.ts`) uses `@tiptap/suggestion` to detect `/` input and show a floating dropdown. Available commands: Text, Heading 1-4, Bullet List, To-do List, Code Block. The dropdown supports keyboard navigation (arrow keys + Enter) and mouse selection.
 
 ### Editor toolbar
 
@@ -570,18 +552,7 @@ export const schema: SchemaDefinition = {
       last_edited_by: 'string?',
       created_by: 'string?',
       is_locked: 'boolean',
-      is_trashed: 'boolean',
-      is_offline: 'boolean'
-    }
-  },
-  note_comments: {
-    indexes: 'note_id, mark_id',
-    fields: {
-      note_id: 'uuid',
-      content: 'string',
-      quote: 'string?',
-      mark_id: 'string',
-      resolved: 'boolean'
+      is_trashed: 'boolean'
     }
   }
 };

@@ -24,7 +24,7 @@
   // ==========================================================================
 
   /* ── Svelte Lifecycle ── */
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy } from 'svelte';
 
   /* ── SvelteKit Navigation ── */
   import { goto } from '$app/navigation';
@@ -38,7 +38,6 @@
     updateNoteMeta,
     trashNote,
     toggleLock,
-    toggleOffline,
     moveNote,
     getBreadcrumbs
   } from '$lib/stores/notes';
@@ -48,9 +47,6 @@
   import NoteTitle from '$lib/components/notes/NoteTitle.svelte';
   import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
   import MoveNoteModal from '$lib/components/notes/MoveNoteModal.svelte';
-  import CommentsPanel from '$lib/components/notes/CommentsPanel.svelte';
-  import AddCommentPopover from '$lib/components/notes/AddCommentPopover.svelte';
-  import { loadCommentsForNote } from '$lib/stores/comments';
 
   /* ── Types ── */
   import type { NotePageData } from './+page';
@@ -78,18 +74,6 @@
 
   /** Controls visibility of the move-note modal. */
   let showMoveModal = $state(false);
-
-  /** Controls visibility of the comments panel. */
-  let showCommentsPanel = $state(false);
-
-  /** Whether the note is available offline. */
-  let isOffline = $state(data.note?.is_offline ?? false);
-
-  /** The Tiptap editor instance, received from NoteEditor via callback. */
-  let editorInstance: import('@tiptap/core').Editor | null = $state(null);
-
-  /** Reference to the AddCommentPopover for showing on selection. */
-  let addCommentPopover: AddCommentPopover | undefined = $state(undefined);
 
   /** Current breadcrumb trail for the note hierarchy. */
   let breadcrumbs = $state<Note[]>(data.breadcrumbs ?? []);
@@ -183,59 +167,10 @@
   }
 
   // ==========================================================================
-  //                       COMMENTS & DOWNLOAD
-  // ==========================================================================
-
-  /**
-   * Receive the editor instance from NoteEditor and load comments.
-   */
-  function handleEditorReady(ed: import('@tiptap/core').Editor): void {
-    editorInstance = ed;
-    if (data.note) {
-      loadCommentsForNote(data.note.id);
-    }
-  }
-
-  /**
-   * Toggle the comments panel.
-   */
-  function handleToggleComments(): void {
-    showCommentsPanel = !showCommentsPanel;
-  }
-
-  /**
-   * Show the add-comment popover above the selected text.
-   */
-  function handleAddComment(): void {
-    addCommentPopover?.show();
-  }
-
-  /**
-   * Toggle offline availability for the note.
-   */
-  async function handleToggleOffline(): Promise<void> {
-    if (!data.note) return;
-    const newOffline = !isOffline;
-    isOffline = newOffline;
-    debug('log', '[NoteEditor] Toggling offline:', data.note.id, newOffline);
-    try {
-      await toggleOffline(data.note.id, newOffline);
-    } catch {
-      isOffline = !newOffline;
-    }
-  }
-
-  // ==========================================================================
   //                         LIFECYCLE — DESTROY
   // ==========================================================================
 
-  onMount(() => {
-    document.body.classList.add('note-editor-active');
-  });
-
   onDestroy(() => {
-    document.body.classList.remove('note-editor-active');
-
     /* Close the CRDT document to release resources (fire-and-forget is safe —
        closeDocument persists dirty state internally before destroying) */
     if (data.note) {
@@ -265,9 +200,6 @@
         onTrash={handleTrash}
         onToggleLock={handleToggleLock}
         onMove={() => (showMoveModal = true)}
-        onToggleComments={handleToggleComments}
-        {isOffline}
-        onToggleOffline={handleToggleOffline}
       />
 
       <!-- ── Editor Content Area ── -->
@@ -293,8 +225,6 @@
           noteId={data.note.id}
           {isLocked}
           onContentChange={handleContentChange}
-          onEditorReady={handleEditorReady}
-          onAddComment={handleAddComment}
         />
       </div>
 
@@ -307,22 +237,6 @@
           onClose={() => (showMoveModal = false)}
         />
       {/if}
-
-      <!-- ── Add Comment Popover ── -->
-      <AddCommentPopover
-        bind:this={addCommentPopover}
-        editor={editorInstance}
-        noteId={data.note.id}
-        onCommentAdded={() => loadCommentsForNote(data.note!.id)}
-      />
-
-      <!-- ── Comments Panel ── -->
-      <CommentsPanel
-        noteId={data.note.id}
-        editor={editorInstance}
-        isOpen={showCommentsPanel}
-        onClose={() => (showCommentsPanel = false)}
-      />
     </div>
   {/key}
 {/if}
@@ -341,11 +255,22 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
+     SYNC STATUS ROW
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  /* Shift the layout's fixed sync status indicator below the note header */
+  :global(.desktop-sync) {
+    top: 60px !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
      NOTE CONTENT — centred editing area, fills remaining height
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
   .note-content {
+    max-width: 720px;
     width: 100%;
+    margin: 0 auto;
     padding: 0 0 3rem;
     flex: 1;
   }

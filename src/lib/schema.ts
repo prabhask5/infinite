@@ -43,18 +43,7 @@ export const schema: SchemaDefinition = {
       last_edited_by: 'string?',
       created_by: 'string?',
       is_locked: 'boolean',
-      is_trashed: 'boolean',
-      is_offline: 'boolean'
-    }
-  },
-  note_comments: {
-    indexes: 'note_id, mark_id',
-    fields: {
-      note_id: 'uuid',
-      content: 'string',
-      quote: 'string?',
-      mark_id: 'string',
-      resolved: 'boolean'
+      is_trashed: 'boolean'
     }
   }
 };

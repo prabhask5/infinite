@@ -11,17 +11,12 @@ Technical deep-dive into the design decisions, data flows, and system internals 
 3. [Auth System](#auth-system)
 4. [Local-First Sync Engine](#local-first-sync-engine)
 5. [CRDT Collaborative Editing](#crdt-collaborative-editing)
-6. [Comments System](#comments-system)
-7. [Image Pipeline](#image-pipeline)
-8. [Link Preview Caching](#link-preview-caching)
-9. [Drag-and-Drop Block Reordering](#drag-and-drop-block-reordering)
-10. [Offline Availability Toggle](#offline-availability-toggle)
-11. [Notes Data Flow](#notes-data-flow)
-12. [Realtime Subscriptions](#realtime-subscriptions)
-13. [Service Worker Lifecycle](#service-worker-lifecycle)
-14. [Database Schema](#database-schema)
-15. [Security Considerations](#security-considerations)
-16. [Demo Mode Architecture](#demo-mode-architecture)
+6. [Notes Data Flow](#notes-data-flow)
+7. [Realtime Subscriptions](#realtime-subscriptions)
+8. [Service Worker Lifecycle](#service-worker-lifecycle)
+9. [Database Schema](#database-schema)
+10. [Security Considerations](#security-considerations)
+11. [Demo Mode Architecture](#demo-mode-architecture)
 
 ---
 
@@ -97,7 +92,6 @@ src/
     [...catchall]/         # Catch-all route for 404 handling
     api/
       config/+server.ts    # GET /api/config: serves runtime Supabase config
-      link-preview/+server.ts  # POST /api/link-preview: fetches OG tags via cheerio
       setup/
         validate/          # POST /api/setup/validate: test Supabase credentials
         deploy/            # POST /api/setup/deploy: set Vercel env vars + redeploy
@@ -119,7 +113,6 @@ src/
     types.generated.ts     # Auto-generated entity types (do not edit)
     stores/
       notes.ts             # Note CRUD operations and reactive stores
-      comments.ts          # Comment CRUD operations for note_comments table
     components/
       UpdatePrompt.svelte  # Service worker update notification
       notes/
@@ -133,18 +126,8 @@ src/
         SlashCommandMenu.svelte    # Floating slash command dropdown
         EditorToolbar.svelte       # Floating bubble toolbar
         NoteCard.svelte    # Note card for list views
-        CommentsPanel.svelte    # Slide-in right sidebar listing comments
-        AddCommentPopover.svelte   # Popover for writing a comment on selected text
         extensions/
           slash-commands.ts # Custom Tiptap slash command extension
-          comment-mark.ts   # Custom Mark: inline comment highlight
-          image-block.ts    # Custom Node: image with resize handles
-          link-preview-block.ts  # Custom Node: rich bookmark card
-          note-block.ts     # Custom Node: embedded sub-page card
-          toc-block.ts      # Custom Node: live table of contents
-          drag-handle.ts    # ProseMirror plugin: drag handles for block reordering
-      services/
-        image-upload.ts    # Image validation and data URL conversion
     demo/
       config.ts            # Demo config (mock profile)
       mockData.ts          # Demo seed data
@@ -371,108 +354,6 @@ No conflict resolution UI is needed. Yjs handles insertion ordering at the chara
 
 ---
 
-## Comments System
-
-### Data model
-
-Comments are stored in the `note_comments` table (synced via the standard sync engine). Each comment has a `note_id`, a `mark_id` (linking it to a `CommentMark` in the Tiptap document), the `content` text, an optional `quote` (the highlighted text at creation time), and a `resolved` boolean.
-
-### Data flow
-
-```
-User selects text -> AddCommentPopover appears
-  -> User writes comment and submits
-  -> CommentMark applied to selected range (Tiptap transaction)
-  -> note_comments record created via engineCreate()
-  -> CommentsPanel reactively updates via collection store
-```
-
-The `CommentMark` is a custom Tiptap Mark that renders as `<mark class="comment-highlight" data-comment-id="...">`. Clicking a highlighted range scrolls the comments panel to the corresponding comment. Resolving or deleting a comment removes the mark from the document and updates/deletes the `note_comments` record.
-
-### CRDT implications
-
-The comment mark is part of the Yjs `XmlFragment`, so it syncs across devices via the standard CRDT path. The `note_comments` metadata syncs via the standard sync engine outbox. Both paths are independent -- the mark and the comment record may arrive on another device in any order. The UI handles the case where a mark exists but the comment record has not synced yet.
-
----
-
-## Image Pipeline
-
-### Offline-first image storage
-
-Images are not uploaded to Supabase Storage. Instead, they are converted to data URLs and stored inline within the Tiptap document (which lives in the Yjs `XmlFragment`).
-
-```
-User pastes/drops/selects image
-  -> image-upload.ts validates file type and size
-  -> FileReader converts to base64 data URL
-  -> ImageBlock node inserted into document
-  -> Data URL persists in Yjs state -> IndexedDB + Supabase
-```
-
-This approach guarantees images are available offline and sync with the document via the existing CRDT pipeline. The tradeoff is increased document size for image-heavy notes.
-
-### Resize handles
-
-The `ImageBlock` custom node renders resize handles that allow the user to drag-resize images. The new dimensions are stored as node attributes (`width`, `height`) and sync via Yjs.
-
----
-
-## Link Preview Caching
-
-### Server-side OG fetching
-
-The `/api/link-preview` endpoint fetches the target URL server-side and extracts Open Graph meta tags using cheerio:
-
-```
-Client sends POST /api/link-preview { url }
-  -> SvelteKit server fetches the URL
-  -> cheerio parses HTML for og:title, og:description, og:image, favicon
-  -> Returns JSON { title, description, image, favicon, url }
-  -> LinkPreviewBlock renders the bookmark card
-```
-
-OG metadata is stored as node attributes in the `LinkPreviewBlock`, so it persists in the Yjs document and does not require re-fetching. The bookmark card displays the title, description, image, and favicon as a rich preview.
-
----
-
-## Drag-and-Drop Block Reordering
-
-### Implementation
-
-The `DragHandle` extension is a ProseMirror plugin (not a node or mark). It decorates the editor with a floating drag handle that appears on hover over any top-level block.
-
-When the user drags a block:
-
-1. The plugin identifies the source block's position in the ProseMirror document.
-2. Native HTML5 drag-and-drop is used for the drag interaction.
-3. On drop, a ProseMirror transaction moves the block to the new position.
-4. The transaction flows through `y-prosemirror`, which converts it to a Yjs update.
-5. The update syncs to other devices via the standard CRDT broadcast path.
-
-### CRDT safety
-
-Block reordering is a structural change to the `XmlFragment`. Yjs handles concurrent reorder operations correctly -- if two devices reorder different blocks simultaneously, both operations are preserved. If they reorder the same block, Yjs's internal operation ordering determines the final position deterministically.
-
----
-
-## Offline Availability Toggle
-
-### Per-note offline persistence
-
-By default, a note's CRDT state is loaded on demand and may not be available offline if the user has not recently visited it. The "Available offline" toggle (in `NoteMenu`) sets `is_offline: true` on the note record and opens the CRDT document with `offlineEnabled: true`:
-
-```
-User toggles "Available offline" ON
-  -> toggleOffline(noteId) updates is_offline in sync engine
-  -> openDocument(docId, noteId, { offlineEnabled: true })
-  -> Yjs state is persisted to IndexedDB proactively
-  -> Note content is available even without network
-```
-
-When `is_offline` is false, the CRDT state may still be cached in IndexedDB from recent use, but it is not guaranteed to be up-to-date. Toggling it on ensures the latest state is always persisted locally.
-
----
-
 ## Notes Data Flow
 
 Infinite Notes uses a **dual persistence model** for notes:
@@ -535,7 +416,6 @@ All note operations are in `src/lib/stores/notes.ts`:
 | Delete | `deleteNote(id)` | Hard-delete via sync engine |
 | Move | `moveNote(id, newParentId)` | Updates `parent_note_id` |
 | Lock/unlock | `toggleLock(id, locked)` | Updates `is_locked` |
-| Toggle offline | `toggleOffline(id)` | Updates `is_offline`, re-opens CRDT doc with persistence |
 | Get children | `getChildNotes(parentId)` | Queries by `parent_note_id` index |
 | Get breadcrumbs | `getBreadcrumbs(noteId)` | Walks up parent chain (max 20 levels) |
 
@@ -619,7 +499,6 @@ The `notes` table is defined in `src/lib/schema.ts`:
 | `created_by` | `text` | NULL | Device/user that created the note |
 | `is_locked` | `boolean` | NOT NULL | Whether the note is read-only |
 | `is_trashed` | `boolean` | NOT NULL | Soft-delete from user's perspective |
-| `is_offline` | `boolean` | NOT NULL | Whether the note's CRDT state is persisted offline |
 | `created_at` | `timestamptz` | NOT NULL | Record creation timestamp (system) |
 | `updated_at` | `timestamptz` | NOT NULL | Last modification timestamp (sync cursor) |
 | `deleted` | `boolean` | NOT NULL | Hard soft-delete flag (tombstone, system) |
@@ -627,23 +506,6 @@ The `notes` table is defined in `src/lib/schema.ts`:
 | `device_id` | `uuid` | NOT NULL | Which device last wrote this record (system) |
 
 Indexes: `parent_note_id`, `order`, `is_trashed`, `updated_at` (always indexed for sync cursor).
-
-### Note comments table
-
-The `note_comments` table stores comment threads attached to text ranges:
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `id` | `uuid` | NOT NULL (PK) | Client-generated |
-| `user_id` | `uuid` | NOT NULL | Foreign key to `auth.users` |
-| `note_id` | `uuid` | NOT NULL | The note this comment belongs to |
-| `content` | `text` | NOT NULL | Comment body text |
-| `quote` | `text` | NULL | The highlighted text at time of creation |
-| `mark_id` | `string` | NOT NULL | Links to the `commentId` attribute on the `CommentMark` in the document |
-| `resolved` | `boolean` | NOT NULL | Whether the comment thread is resolved |
-| + system columns | | | `created_at`, `updated_at`, `deleted`, `_version`, `device_id` |
-
-Indexes: `note_id`, `mark_id`.
 
 ### Soft deletes and tombstones
 
