@@ -258,9 +258,13 @@
      SYNC STATUS ROW
      ═══════════════════════════════════════════════════════════════════════════════════ */
 
-  /* Shift the layout's fixed sync status indicator below the note header */
+  /* Hide the global sync status on the note editor (NoteSyncStatus handles it) */
   :global(.desktop-sync) {
-    top: 60px !important;
+    display: none !important;
+  }
+
+  :global(.mobile-sync) {
+    display: none !important;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════

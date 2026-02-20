@@ -92,27 +92,85 @@
     aria-label="Note menu"
     aria-expanded={isOpen}
   >
-    &#x22EE;
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
   </button>
 
   {#if isOpen}
     <div class="dropdown" role="menu">
       <button class="dropdown-item" type="button" role="menuitem" onclick={handleMove}>
-        <span class="item-icon">{'\u{1F4C1}'}</span>
+        <span class="item-icon"
+          ><svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path
+              d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+            /></svg
+          ></span
+        >
         Move to...
       </button>
 
       <div class="divider"></div>
 
       <button class="dropdown-item" type="button" role="menuitem" onclick={handleToggleLock}>
-        <span class="item-icon">{isLocked ? '\u{1F513}' : '\u{1F512}'}</span>
+        <span class="item-icon"
+          >{#if isLocked}<svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path
+                d="M7 11V7a5 5 0 0 1 9.9-1"
+              /></svg
+            >{:else}<svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path
+                d="M7 11V7a5 5 0 0 1 10 0v4"
+              /></svg
+            >{/if}</span
+        >
         {isLocked ? 'Unlock page' : 'Lock page'}
       </button>
 
       <div class="divider"></div>
 
       <button class="dropdown-item danger" type="button" role="menuitem" onclick={handleTrash}>
-        <span class="item-icon">{'\u{1F5D1}'}</span>
+        <span class="item-icon"
+          ><svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path
+              d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
+            /></svg
+          ></span
+        >
         Move to trash
       </button>
     </div>
@@ -190,9 +248,10 @@
 
   .item-icon {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 1.25rem;
-    text-align: center;
-    font-size: 0.875rem;
   }
 
   .divider {

@@ -120,16 +120,11 @@
   // ===========================================================================
 
   const buttons = [
-    { label: 'Bold', mark: 'bold', icon: 'B', style: 'font-weight: 700;' },
-    { label: 'Italic', mark: 'italic', icon: 'I', style: 'font-style: italic;' },
-    { label: 'Underline', mark: 'underline', icon: 'U', style: 'text-decoration: underline;' },
-    { label: 'Strikethrough', mark: 'strike', icon: 'S', style: 'text-decoration: line-through;' },
-    {
-      label: 'Code',
-      mark: 'code',
-      icon: '<>',
-      style: 'font-family: monospace; font-size: 0.75rem;'
-    }
+    { label: 'Bold', mark: 'bold' },
+    { label: 'Italic', mark: 'italic' },
+    { label: 'Underline', mark: 'underline' },
+    { label: 'Strikethrough', mark: 'strike' },
+    { label: 'Code', mark: 'code' }
   ];
 </script>
 
@@ -154,7 +149,76 @@
           toggleMark(btn.mark);
         }}
       >
-        <span style={btn.style}>{btn.icon}</span>
+        {#if btn.mark === 'bold'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"><path d="M6 12h9a4 4 0 0 1 0 8H6V4h8a4 4 0 0 1 0 8" /></svg
+          >
+        {:else if btn.mark === 'italic'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><line x1="19" x2="10" y1="4" y2="4" /><line x1="14" x2="5" y1="20" y2="20" /><line
+              x1="15"
+              x2="9"
+              y1="4"
+              y2="20"
+            /></svg
+          >
+        {:else if btn.mark === 'underline'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" x2="20" y1="20" y2="20" /></svg
+          >
+        {:else if btn.mark === 'strike'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M16 4H9a3 3 0 0 0-2.83 4" /><path d="M14 12a4 4 0 0 1 0 8H6" /><line
+              x1="4"
+              x2="20"
+              y1="12"
+              y2="12"
+            /></svg
+          >
+        {:else if btn.mark === 'code'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg
+          >
+        {/if}
       </button>
     {/each}
 
@@ -172,7 +236,19 @@
         toggleLink();
       }}
     >
-      <span style="font-size: 0.8rem;">{'\u{1F517}'}</span>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path
+          d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+        /></svg
+      >
     </button>
   </div>
 {/if}
