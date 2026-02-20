@@ -45,27 +45,29 @@ export const load: PageLoad = async ({ params }): Promise<NotePageData> => {
 
   debug('log', '[NoteEditor] Opening CRDT document:', documentId);
 
-  // Load note metadata first (fast), open CRDT document in parallel
+  // Load note metadata first to determine offline settings
   let provider: CRDTProvider | null = null;
   try {
-    const [note, breadcrumbs, prov] = await Promise.all([
+    const [note, breadcrumbs] = await Promise.all([
       queryOne<Note>('notes', noteId),
-      getBreadcrumbs(noteId),
-      openDocument(documentId, noteId, { offlineEnabled: true })
+      getBreadcrumbs(noteId)
     ]);
-    provider = prov;
 
     if (!note) {
       debug('error', '[NoteEditor] Note not found:', noteId);
-      // Clean up leaked provider on 404
-      void closeDocument(documentId);
       currentDocumentId = null;
       error(404, 'Note not found');
     }
 
+    // Only persist CRDT state to IndexedDB when the note has offline enabled
+    const prov = await openDocument(documentId, noteId, {
+      offlineEnabled: note.is_offline ?? false
+    });
+    provider = prov;
+
     // Create block document structure (ensures content + meta shared types exist)
     const { meta } = createBlockDocument(provider.doc);
-    debug('log', '[NoteEditor] CRDT document opened, Y.Doc ready');
+    debug('log', '[NoteEditor] CRDT document opened, Y.Doc ready, offline=', note.is_offline);
 
     return { note, provider, ydoc: provider.doc, meta, breadcrumbs };
   } catch (e) {

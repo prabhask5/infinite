@@ -47,6 +47,25 @@ export interface Note {
   created_by: string | null;
   is_locked: boolean;
   is_trashed: boolean;
+  is_offline: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted: boolean;
+}
+
+// =============================================================================
+//  Comment Entity
+// =============================================================================
+
+/** A comment associated with a highlighted text range in a note. */
+export interface NoteComment {
+  [key: string]: unknown;
+  id: string;
+  note_id: string;
+  content: string;
+  quote: string | null;
+  mark_id: string;
+  resolved: boolean;
   created_at: string;
   updated_at: string;
   deleted: boolean;

@@ -1232,10 +1232,15 @@
 
   .desktop-sync {
     position: fixed;
-    top: 16px;
-    right: 16px;
+    top: 8px;
+    right: 8px;
     z-index: 101;
     display: none;
+  }
+
+  /* Shift sync status below the note header on the note editor page */
+  :global(body.note-editor-active) .desktop-sync {
+    top: 56px;
   }
 
   /* Override tooltip to open to the left (not right) since we're in the top-right corner */

@@ -21,12 +21,16 @@
     isLocked,
     onToggleLock,
     onTrash,
-    onMove
+    onMove,
+    isOffline,
+    onToggleOffline
   }: {
     isLocked: boolean;
     onToggleLock: () => void;
     onTrash: () => void;
     onMove: () => void;
+    isOffline?: boolean;
+    onToggleOffline?: () => void;
   } = $props();
 
   // ===========================================================================
@@ -70,6 +74,11 @@
     onTrash();
   }
 
+  function handleToggleOffline() {
+    close();
+    onToggleOffline?.();
+  }
+
   // ===========================================================================
   //  Effects
   // ===========================================================================
@@ -101,6 +110,13 @@
         <span class="item-icon">{'\u{1F4C1}'}</span>
         Move to...
       </button>
+
+      {#if onToggleOffline}
+        <button class="dropdown-item" type="button" role="menuitem" onclick={handleToggleOffline}>
+          <span class="item-icon">{isOffline ? '\u{2705}' : '\u{1F4F6}'}</span>
+          {isOffline ? 'Available offline' : 'Make available offline'}
+        </button>
+      {/if}
 
       <div class="divider"></div>
 

@@ -29,6 +29,12 @@
   import Underline from '@tiptap/extension-underline';
   import Link from '@tiptap/extension-link';
   import { SlashCommands } from './extensions/slash-commands';
+  import { CommentMark } from './extensions/comment-mark';
+  import { ImageBlock } from './extensions/image-block';
+  import { LinkPreviewBlock } from './extensions/link-preview-block';
+  import { NoteBlock } from './extensions/note-block';
+  import { TocBlock } from './extensions/toc-block';
+  import { DragHandle } from './extensions/drag-handle';
   import type { SlashCommandItem } from './extensions/slash-commands';
   import SlashCommandMenu from './SlashCommandMenu.svelte';
   import EditorToolbar from './EditorToolbar.svelte';
@@ -50,9 +56,21 @@
     noteId: string;
     /** Called when content changes (debounced). */
     onContentChange?: () => void;
+    /** Called when the editor is ready, provides the editor instance. */
+    onEditorReady?: (editor: Editor) => void;
+    /** Called when the user triggers "add comment" from the toolbar. */
+    onAddComment?: () => void;
   }
 
-  let { ydoc, meta: _meta, isLocked, noteId, onContentChange }: Props = $props();
+  let {
+    ydoc,
+    meta: _meta,
+    isLocked,
+    noteId,
+    onContentChange,
+    onEditorReady,
+    onAddComment
+  }: Props = $props();
 
   // ===========================================================================
   //  State
@@ -203,6 +221,12 @@
             render: buildSuggestionRender()
           }
         }),
+        CommentMark,
+        ImageBlock,
+        LinkPreviewBlock,
+        NoteBlock,
+        TocBlock,
+        DragHandle,
         // Tab/Shift+Tab indent/outdent for lists and task lists
         Extension.create({
           name: 'listIndent',
@@ -243,6 +267,7 @@
     });
 
     debug('log', `[NoteEditor:${noteId}] Editor mounted, editable=${!isLocked}`);
+    onEditorReady?.(editor);
   });
 
   onDestroy(() => {
@@ -296,10 +321,10 @@
 
 <div class="note-editor">
   {#if editor}
-    <EditorToolbar {editor} />
+    <EditorToolbar {editor} {onAddComment} />
   {/if}
 
-  <div class="editor-container" bind:this={editorContainer}></div>
+  <div class="editor-container" bind:this={editorContainer} data-note-id={noteId}></div>
 
   {#if slashMenuShowing}
     <SlashCommandMenu
@@ -556,5 +581,336 @@
 
   :global(.tiptap p) {
     margin: 0.25rem 0;
+  }
+
+  /* --------------------------------------------------------------------------
+     Comment highlights
+     -------------------------------------------------------------------------- */
+
+  :global(.comment-highlight) {
+    background: rgba(74, 125, 255, 0.15);
+    border-bottom: 2px solid var(--color-primary);
+    padding: 0.1em 0;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s ease;
+  }
+
+  :global(.comment-highlight:hover) {
+    background: rgba(74, 125, 255, 0.25);
+  }
+
+  :global(.comment-highlight--flash) {
+    animation: commentFlash 1.2s ease;
+  }
+
+  @keyframes commentFlash {
+    0%,
+    100% {
+      background: rgba(74, 125, 255, 0.15);
+    }
+    50% {
+      background: rgba(74, 125, 255, 0.4);
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     Image blocks
+     -------------------------------------------------------------------------- */
+
+  :global(.image-block) {
+    margin: 1rem 0;
+    position: relative;
+    display: flex;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  :global(.image-block[data-alignment='center']) {
+    justify-content: center;
+  }
+
+  :global(.image-block[data-alignment='right']) {
+    justify-content: flex-end;
+  }
+
+  :global(.image-block figure) {
+    margin: 0;
+    position: relative;
+    max-width: 100%;
+  }
+
+  :global(.image-block img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+
+  :global(.image-block .resize-handle) {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+
+  :global(.image-block .resize-handle:hover),
+  :global(.image-block .resize-handle.resizing) {
+    background: var(--color-primary);
+    opacity: 0.5;
+    border-radius: 4px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Link preview blocks
+     -------------------------------------------------------------------------- */
+
+  :global(.link-preview-block) {
+    margin: 1rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+    cursor: pointer;
+  }
+
+  :global(.link-preview-block:hover) {
+    border-color: var(--color-primary);
+  }
+
+  :global(.link-preview-block .lp-content) {
+    padding: 12px 16px;
+  }
+
+  :global(.link-preview-block .lp-domain) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+  }
+
+  :global(.link-preview-block .lp-favicon) {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+  }
+
+  :global(.link-preview-block .lp-title) {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  :global(.link-preview-block .lp-description) {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  :global(.link-preview-block .lp-image) {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  :global(.link-preview-block .lp-skeleton) {
+    padding: 16px;
+  }
+
+  :global(.link-preview-block .lp-skeleton-line) {
+    height: 12px;
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    animation: skeletonPulse 1.5s ease infinite;
+  }
+
+  :global(.link-preview-block .lp-skeleton-line:first-child) {
+    width: 40%;
+  }
+
+  :global(.link-preview-block .lp-skeleton-line:nth-child(2)) {
+    width: 80%;
+  }
+
+  :global(.link-preview-block .lp-skeleton-line:last-child) {
+    width: 60%;
+  }
+
+  @keyframes skeletonPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     Note blocks (sub-pages)
+     -------------------------------------------------------------------------- */
+
+  :global(.note-block) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin: 0.75rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+    user-select: none;
+  }
+
+  :global(.note-block:hover) {
+    border-color: var(--color-primary);
+    background: var(--color-bg-secondary);
+  }
+
+  :global(.note-block-icon) {
+    font-size: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  :global(.note-block-title) {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.note-block-arrow) {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* --------------------------------------------------------------------------
+     Table of Contents blocks
+     -------------------------------------------------------------------------- */
+
+  :global(.toc-block) {
+    margin: 1rem 0;
+    padding: 16px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+  }
+
+  :global(.toc-title) {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  :global(.toc-empty) {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 0;
+  }
+
+  :global(.toc-list) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  :global(.toc-item) {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition:
+      background 0.1s ease,
+      color 0.1s ease;
+    text-decoration: none;
+  }
+
+  :global(.toc-item:hover) {
+    background: var(--color-primary-subtle);
+    color: var(--color-primary);
+  }
+
+  :global(.toc-level-2) {
+    padding-left: 20px;
+  }
+  :global(.toc-level-3) {
+    padding-left: 36px;
+  }
+  :global(.toc-level-4) {
+    padding-left: 52px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Drag handle
+     -------------------------------------------------------------------------- */
+
+  :global(.drag-handle) {
+    position: absolute;
+    left: -28px;
+    width: 20px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition:
+      opacity 0.15s ease,
+      background 0.1s ease;
+    z-index: 10;
+    color: var(--color-text-muted);
+  }
+
+  :global(.drag-handle:hover) {
+    opacity: 1 !important;
+    background: var(--color-bg-tertiary);
+  }
+
+  :global(.drag-handle.visible) {
+    opacity: 0.5;
+  }
+
+  :global(.drag-handle:active) {
+    cursor: grabbing;
+  }
+
+  :global(.drop-indicator) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 1px;
+    z-index: 20;
+    pointer-events: none;
   }
 </style>

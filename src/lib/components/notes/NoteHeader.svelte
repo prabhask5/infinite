@@ -32,7 +32,10 @@
     isLocked,
     onToggleLock,
     onTrash,
-    onMove
+    onMove,
+    onToggleComments,
+    isOffline,
+    onToggleOffline
   }: {
     noteId: string;
     note: Note;
@@ -41,6 +44,9 @@
     onToggleLock: () => void;
     onTrash: () => void;
     onMove: () => void;
+    onToggleComments?: () => void;
+    isOffline?: boolean;
+    onToggleOffline?: () => void;
   } = $props();
 
   $effect(() => {
@@ -55,7 +61,18 @@
 
   <div class="header-right">
     <NoteSyncStatus lastEditedAt={note.last_edited_at} lastEditedBy={note.last_edited_by} />
-    <NoteMenu {isLocked} {onToggleLock} {onTrash} {onMove} />
+    {#if onToggleComments}
+      <button
+        class="header-icon-btn"
+        type="button"
+        onclick={onToggleComments}
+        title="Toggle comments"
+        aria-label="Toggle comments"
+      >
+        {'\u{1F4AC}'}
+      </button>
+    {/if}
+    <NoteMenu {isLocked} {onToggleLock} {onTrash} {onMove} {isOffline} {onToggleOffline} />
   </div>
 </header>
 
@@ -66,7 +83,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: none;
   }
 
   .header-left {
@@ -80,5 +97,28 @@
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
+  }
+
+  .header-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+    padding: 0;
+  }
+
+  .header-icon-btn:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-border);
   }
 </style>
